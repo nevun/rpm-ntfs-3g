@@ -3,7 +3,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	0
-Release:	0.3.%{buildrev}%{?dist}
+Release:	0.4.%{buildrev}%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://mlf.linux.rulez.org/mlf/ezaz/%{name}-%{buildrev}-BETA.tgz
@@ -13,6 +13,8 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
 Epoch:		1
+Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
+Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 
 %description
 The ntfs-3g driver is an open source, GPL licensed, third generation 
@@ -75,6 +77,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Wed Oct 25 2006 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.4.20070920
+- add some extra Provides
+
 * Mon Oct 16 2006 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.3.20070920
 - add explicit Requires on fuse
 
