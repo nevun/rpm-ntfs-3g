@@ -3,7 +3,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	0
-Release:	0.4.%{buildrev}%{?dist}
+Release:	0.5.%{buildrev}%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://mlf.linux.rulez.org/mlf/ezaz/%{name}-%{buildrev}-BETA.tgz
@@ -14,6 +14,7 @@ BuildRequires:	fuse-devel
 Requires:	fuse
 Epoch:		1
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
+Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 
 %description
@@ -56,6 +57,13 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
 rm -rf $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
 cp -a $RPM_BUILD_ROOT%{_bindir}/ntfs-3g $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
 
+# Actually make some symlinks for simplicity...
+# ... since we're obsoleting ntfsprogs-fuse
+cd $RPM_BUILD_ROOT%{_bindir}
+ln -s ntfs-3g ntfsmount
+cd $RPM_BUILD_ROOT/sbin
+ln -s mount.ntfs-3g mount.ntfs-fuse
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -67,7 +75,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 /sbin/mount.ntfs-3g
+/sbin/mount.ntfs-fuse
 %{_bindir}/ntfs-3g
+%{_bindir}/ntfsmount
 %{_libdir}/libntfs-3g.so.*
 %{_mandir}/man8/*
 
@@ -77,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Wed Nov  1 2006 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.5.20070920
+- add an obsoletes for ntfsprogs-fuse
+- make some convenience symlinks
+
 * Wed Oct 25 2006 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.4.20070920
 - add some extra Provides
 
