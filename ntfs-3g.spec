@@ -1,9 +1,9 @@
-%define buildrev 20070102
+%define buildrev 20070116
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	0
-Release:	0.6.%{buildrev}%{?dist}
+Release:	0.7.%{buildrev}%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/ntfs-3g-0.%{buildrev}-BETA.tgz
@@ -12,7 +12,7 @@ URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
-Epoch:		1
+Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
@@ -87,6 +87,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Wed Jan 17 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.7.20070116
+- bump to latest version for all active dists
+
 * Wed Jan  3 2007 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.6.20070102
 - bump to latest version (note that upstream fixed their date mistake)
 
