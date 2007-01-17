@@ -1,4 +1,4 @@
-%define buildrev 20070920
+%define buildrev 20070116
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
@@ -6,9 +6,9 @@ Version:	0
 Release:	0.7.%{buildrev}%{?dist}
 License:	GPL
 Group:		System Environment/Base
-Source0:	http://mlf.linux.rulez.org/mlf/ezaz/%{name}-%{buildrev}-BETA.tgz
-Patch0:		ntfs-3g-20070920-BETA-noldconfig.patch
-URL:		http://mlf.linux.rulez.org/mlf/ezaz/ntfs-3g-download.html
+Source0:	http://www.ntfs-3g.org/ntfs-3g-0.%{buildrev}-BETA.tgz
+Patch0:		ntfs-3g-0.20070102-BETA-noldconfig.patch
+URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
@@ -41,7 +41,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q -n %{name}-%{buildrev}-BETA
+%setup -q -n %{name}-0.%{buildrev}-BETA
 %patch0 -p1
 
 %build
@@ -87,8 +87,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
-* Thu Jan  4 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.7.20070920
-- revert, epoch bump because kernel fuse is too old for new ntfs-3g
+* Wed Jan 17 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.7.20070116
+- bump to latest version for all active dists
+
+* Wed Jan  3 2007 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.6.20070102
+- bump to latest version (note that upstream fixed their date mistake)
 
 * Wed Nov  1 2006 Tom "spot" Callaway <tcallawa@redhat.com> 1:0-0.5.20070920
 - add an obsoletes for ntfsprogs-fuse
