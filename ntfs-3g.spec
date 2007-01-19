@@ -3,7 +3,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	0
-Release:	0.8.%{buildrev}%{?dist}
+Release:	0.9.%{buildrev}%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/ntfs-3g-0.%{buildrev}-BETA.tgz
@@ -63,6 +63,9 @@ cd $RPM_BUILD_ROOT%{_bindir}
 ln -s ntfs-3g ntfsmount
 cd $RPM_BUILD_ROOT/sbin
 ln -s mount.ntfs-3g mount.ntfs-fuse
+# And since there is no other package in Fedora that provides an ntfs 
+# mount...
+ln -s mount.ntfs-3g mount.ntfs
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -74,6 +77,7 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
+/sbin/mount.ntfs
 /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
 %{_bindir}/ntfs-3g
@@ -87,6 +91,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Fri Jan 19 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.9.20070118
+- symlink to mount.ntfs
+
 * Wed Jan 17 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.8.20070118
 - bump to 20070118
 
