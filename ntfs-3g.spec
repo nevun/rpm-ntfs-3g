@@ -1,12 +1,10 @@
-%define buildrev 20070118
-
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	0
-Release:	0.9.%{buildrev}%{?dist}
+Version:	1.0
+Release:	1%{?dist}
 License:	GPL
 Group:		System Environment/Base
-Source0:	http://www.ntfs-3g.org/ntfs-3g-0.%{buildrev}-BETA.tgz
+Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
 Patch0:		ntfs-3g-0.20070102-BETA-noldconfig.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -41,7 +39,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q -n %{name}-0.%{buildrev}-BETA
+%setup -q
 %patch0 -p1
 
 %build
@@ -91,6 +89,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Wed Feb 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.0-1
+- 1.0 release!
+
 * Fri Jan 19 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:0-0.9.20070118
 - symlink to mount.ntfs
 
