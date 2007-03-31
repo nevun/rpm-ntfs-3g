@@ -1,11 +1,10 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.0
+Version:	1.328
 Release:	1%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
-Patch0:		ntfs-3g-0.20070102-BETA-noldconfig.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
@@ -40,10 +39,9 @@ functionality.
 
 %prep
 %setup -q
-%patch0 -p1
 
 %build
-%configure --disable-static
+%configure --disable-static --disable-ldconfig
 make %{?_smp_mflags}
 
 %install
@@ -89,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Sat Mar 31 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.328-1
+- bump to 1.328
+- drop patch, use --disable-ldconfig instead
+
 * Wed Feb 21 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.0-1
 - 1.0 release!
 
