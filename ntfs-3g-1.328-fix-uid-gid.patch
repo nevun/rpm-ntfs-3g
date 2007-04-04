@@ -1,0 +1,14 @@
+diff -Naur ntfs-3g-1.328.orig/src/ntfs-3g.c ntfs-3g-1.328/src/ntfs-3g.c
+--- ntfs-3g-1.328.orig/src/ntfs-3g.c	2007-03-27 23:09:42.000000000 +0200
++++ ntfs-3g-1.328/src/ntfs-3g.c	2007-04-03 13:57:57.000000000 +0200
+@@ -1607,8 +1607,8 @@
+ 	
+ 	*ctx = (ntfs_fuse_context_t) {
+ 		.state = NF_FreeClustersOutdate | NF_FreeMFTOutdate,
+-		.uid = geteuid(),
+-		.gid = getegid(),
++		.uid = getuid(),
++		.gid = getgid(),
+ 		.fmask = 0,
+ 		.dmask = 0,
+ 		.streams = NF_STREAMS_INTERFACE_NONE,
