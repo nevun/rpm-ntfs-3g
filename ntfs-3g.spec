@@ -1,7 +1,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.328
-Release:	2%{?dist}
+Version:	1.416
+Release:	1%{?dist}
 License:	GPL
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
@@ -13,7 +13,6 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
-Patch0:		ntfs-3g-1.328-fix-uid-gid.patch
 
 %description
 The ntfs-3g driver is an open source, GPL licensed, third generation 
@@ -40,7 +39,6 @@ functionality.
 
 %prep
 %setup -q
-%patch0 -p1 -b .fix-uid-gid
 
 %build
 %configure --disable-static --disable-ldconfig
@@ -89,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Sun Apr 15 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.416-1
+- bump to 1.416
+- drop patch0, upstreamed
+
 * Wed Apr  4 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.328-2
 - allow non-root users to mount/umount ntfs volumes (Laszlo Dvornik)
 
