@@ -1,6 +1,6 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.417
+Version:	1.516
 Release:	1%{?dist}
 License:	GPL
 Group:		System Environment/Base
@@ -87,6 +87,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libntfs-3g.so
 
 %changelog
+* Tue May 15 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.516-1
+- bump to 1.516
+- fix bugzilla 232031
+
 * Sun Apr 15 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.417-1
 - bump to 1.417
 
