@@ -1,6 +1,6 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.516
+Version:	1.710
 Release:	1%{?dist}
 License:	GPL
 Group:		System Environment/Base
@@ -41,27 +41,34 @@ functionality.
 %setup -q
 
 %build
-%configure --disable-static --disable-ldconfig
+%configure --disable-static --disable-ldconfig --exec-prefix=/ --bindir=/bin --libdir=/%{_lib}
 make %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
-rm -rf $RPM_BUILD_ROOT%{_libdir}/*.la
+rm -rf $RPM_BUILD_ROOT/%{_lib}/*.la
 
 # make the symlink an actual copy to avoid confusion
 rm -rf $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
-cp -a $RPM_BUILD_ROOT%{_bindir}/ntfs-3g $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
+cp -a $RPM_BUILD_ROOT/bin/ntfs-3g $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
-cd $RPM_BUILD_ROOT%{_bindir}
+cd $RPM_BUILD_ROOT/bin
 ln -s ntfs-3g ntfsmount
 cd $RPM_BUILD_ROOT/sbin
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
 ln -s mount.ntfs-3g mount.ntfs
+
+# Compat symlinks
+mkdir -p $RPM_BUILD_ROOT%{_bindir}
+cd $RPM_BUILD_ROOT%{_bindir}
+ln -s /bin/ntfs-3g ntfs-3g
+ln -s /bin/ntfsmount ntfsmount
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -76,17 +83,26 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/mount.ntfs
 %attr(4754,root,fuse) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
+/bin/ntfs-3g
+/bin/ntfsmount
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
-%{_libdir}/libntfs-3g.so.*
+/%{_lib}/libntfs-3g.so.*
 %{_mandir}/man8/*
 
 %files devel
 %defattr(-,root,root,-)
 %{_includedir}/ntfs-3g/
-%{_libdir}/libntfs-3g.so
+/%{_lib}/libntfs-3g.so
 
 %changelog
+* Sun Jul 22 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.710-1
+- bump to 1.710
+- add compat symlinks
+
+* Wed Jun 27 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.616-1
+- bump to 1.616
+
 * Tue May 15 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.516-1
 - bump to 1.516
 - fix bugzilla 232031
