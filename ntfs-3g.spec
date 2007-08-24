@@ -2,7 +2,7 @@ Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.710
 Release:	1%{?dist}
-License:	GPL
+License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
 URL:		http://www.ntfs-3g.org/
