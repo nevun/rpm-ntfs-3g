@@ -1,8 +1,8 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.710
+Version:	1.810
 Release:	1%{?dist}
-License:	GPL
+License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
 URL:		http://www.ntfs-3g.org/
@@ -13,6 +13,7 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
+Patch0:		ntfs-3g-1.810-glibc27-open.patch
 
 %description
 The ntfs-3g driver is an open source, GPL licensed, third generation 
@@ -39,6 +40,7 @@ functionality.
 
 %prep
 %setup -q
+%patch0 -p1
 
 %build
 %configure --disable-static --disable-ldconfig --exec-prefix=/ --bindir=/bin --libdir=/%{_lib}
@@ -96,6 +98,11 @@ rm -rf $RPM_BUILD_ROOT
 /%{_lib}/libntfs-3g.so
 
 %changelog
+* Fri Aug 24 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.810-1
+- bump to 1.810
+- fix license tag
+- rebuild for ppc32
+
 * Sun Jul 22 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.710-1
 - bump to 1.710
 - add compat symlinks
