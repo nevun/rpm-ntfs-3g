@@ -1,6 +1,6 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.826
+Version:	1.913
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 /%{_lib}/libntfs-3g.so
 
 %changelog
+* Mon Sep 17 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.913-1
+- bump to 1.913
+
 * Sun Aug 26 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.826-1
 - bump to 1.826
 - glibc27 patch is upstreamed
