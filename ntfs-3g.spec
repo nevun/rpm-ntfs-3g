@@ -1,7 +1,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.913
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
@@ -81,7 +81,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 /sbin/mount.ntfs
-%attr(4754,root,fuse) /sbin/mount.ntfs-3g
+%attr(754,root,fuse) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
 /bin/ntfs-3g
 /bin/ntfsmount
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 /%{_lib}/libntfs-3g.so
 
 %changelog
+* Thu Sep 20 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.913-2
+- don't set /sbin/mount.ntfs-3g setuid
+
 * Mon Sep 17 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.913-1
 - bump to 1.913
 
