@@ -1,7 +1,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.913
-Release:	2%{?dist}
+Version:	1.1004
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 /%{_lib}/libntfs-3g.so
 
 %changelog
+* Sat Oct  6 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1004-1
+- bump to 1.1004
+
 * Thu Sep 20 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.913-2
 - don't set /sbin/mount.ntfs-3g setuid
 
