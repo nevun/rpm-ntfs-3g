@@ -1,6 +1,6 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.1104
+Version:	1.1120
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -96,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 /%{_lib}/libntfs-3g.so
 
 %changelog
+* Tue Nov 20 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1120-1
+- bump to 1.1120
+
 * Thu Nov  8 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1104-1
 - bump to 1.1104
 
