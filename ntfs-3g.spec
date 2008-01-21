@@ -1,14 +1,21 @@
+# Pass --with externalfuse to compile against system fuse lib
+# Default is internal fuse-lite.
+%define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
+
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.1120
-Release:	1%{?dist}
+Version:	1.2121
+Release:	0.1.RC%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
+Source0:	http://www.ntfs-3g.org/%{name}-%{version}-RC.tgz
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+%if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
+%endif
+Requires:	pkgconfig
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
@@ -38,10 +45,20 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-RC
 
 %build
-%configure --disable-static --disable-ldconfig --exec-prefix=/ --bindir=/bin --libdir=/%{_lib}
+CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
+%configure \
+	--disable-static \
+	--disable-ldconfig \
+%if 0%{?_with_externalfuse:1}
+	--with-fuse=external \
+%endif
+	--exec-prefix=/ \
+	--bindir=/bin \
+	--sbindir=/sbin \
+	--libdir=/%{_lib}
 make %{?_smp_mflags}
 
 %install
@@ -69,6 +86,12 @@ cd $RPM_BUILD_ROOT%{_bindir}
 ln -s /bin/ntfs-3g ntfs-3g
 ln -s /bin/ntfsmount ntfsmount
 
+# Put the .pc file in the right place.
+mkdir -p $RPM_BUILD_ROOT%{_libdir}/pkgconfig/
+mv $RPM_BUILD_ROOT/%{_lib}/pkgconfig/libntfs-3g.pc $RPM_BUILD_ROOT%{_libdir}/pkgconfig/
+
+# We get this on our own, thanks.
+rm -rf $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}/README
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -85,6 +108,7 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/mount.ntfs-fuse
 /bin/ntfs-3g
 /bin/ntfsmount
+/bin/ntfs-3g.probe
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
 /%{_lib}/libntfs-3g.so.*
@@ -94,10 +118,13 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_includedir}/ntfs-3g/
 /%{_lib}/libntfs-3g.so
+%{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
 * Tue Nov 20 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1120-1
 - bump to 1.1120
+- default to fuse-lite (internal to ntfs-3g), but enable --with externalfuse 
+  as an option
 
 * Thu Nov  8 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1104-1
 - bump to 1.1104
