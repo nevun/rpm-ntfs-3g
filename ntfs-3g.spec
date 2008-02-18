@@ -4,11 +4,11 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.2121
-Release:	0.1.RC%{?dist}
+Version:	1.2216
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://www.ntfs-3g.org/%{name}-%{version}-RC.tgz
+Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{with_externalfuse}
@@ -45,7 +45,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q -n %{name}-%{version}-RC
+%setup -q -n %{name}-%{version}
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -104,7 +104,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 /sbin/mount.ntfs
-%attr(754,root,fuse) /sbin/mount.ntfs-3g
+%attr(754,root,root) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
 /bin/ntfs-3g
 /bin/ntfsmount
@@ -121,6 +121,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Feb 18 2008 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.2216-1
+- update to 1.2216
+
 * Tue Nov 20 2007 Tom "spot" Callaway <tcallawa@redhat.com> 2:1.1120-1
 - bump to 1.1120
 - default to fuse-lite (internal to ntfs-3g), but enable --with externalfuse 
