@@ -4,11 +4,12 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.2216
-Release:	3%{?dist}
+Version:	1.2310
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
+Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{with_externalfuse}
@@ -46,6 +47,7 @@ functionality.
 
 %prep
 %setup -q -n %{name}-%{version}
+%patch0 -p1
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -102,7 +104,8 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-%doc AUTHORS ChangeLog COPYING CREDITS NEWS README
+# COPYING disappeared in 1.2310
+%doc AUTHORS ChangeLog CREDITS NEWS README
 /sbin/mount.ntfs
 %attr(754,root,root) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
@@ -121,6 +124,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Mar 10 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2310-1
+- update to 1.2310
+- make -n a noop (bz 403291)
+
 * Tue Feb 26 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2216-3
 - rebuild against fixed gcc (PR35264, bugzilla 433546)
 

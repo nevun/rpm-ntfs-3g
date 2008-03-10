@@ -1,0 +1,28 @@
+diff -up ntfs-3g-1.2216/src/ntfs-3g.c.BAD ntfs-3g-1.2216/src/ntfs-3g.c
+--- ntfs-3g-1.2216/src/ntfs-3g.c.BAD	2008-02-27 11:40:33.000000000 -0500
++++ ntfs-3g-1.2216/src/ntfs-3g.c	2008-02-27 13:17:57.000000000 -0500
+@@ -1947,10 +1947,11 @@ static int parse_options(int argc, char 
+ {
+ 	int c;
+ 
+-	static const char *sopt = "-o:hv";
++	static const char *sopt = "-o:hnv";
+ 	static const struct option lopt[] = {
+ 		{ "options",	 required_argument,	NULL, 'o' },
+ 		{ "help",	 no_argument,		NULL, 'h' },
++		{ "nomtab",	 no_argument,		NULL, 'n' },
+ 		{ "verbose",	 no_argument,		NULL, 'v' },
+ 		{ NULL,		 0,			NULL,  0  }
+ 	};
+@@ -1989,6 +1990,11 @@ static int parse_options(int argc, char 
+ 			if (strappend(&opts.options, optarg))
+ 				return -1;
+ 			break;
++		case 'n':
++			/* We must handle the 'nomtab' option even if
++			 * we don't use it because mount(8) passes it.
++			 */
++			break;
+ 		case 'h':
+ 			usage();
+ 			exit(9);
