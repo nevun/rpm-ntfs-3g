@@ -4,8 +4,8 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.2310
-Release:	2%{?dist}
+Version:	1.2412
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
@@ -104,8 +104,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-# COPYING disappeared in 1.2310
-%doc AUTHORS ChangeLog CREDITS NEWS README
+%doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 /sbin/mount.ntfs
 %attr(754,root,root) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
@@ -124,6 +123,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Tue Apr 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2412-1
+- update to 1.2412
+
 * Mon Mar 10 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2310-2
 - update sources
 
