@@ -5,7 +5,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.2506
-Release:	1%{?dist}
+Release:	1%{?dist}.1
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
@@ -123,6 +123,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon May  5 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2506-1.1
+- missing patch
+
 * Mon May  5 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2506-1
 - update to 1.2506
 
