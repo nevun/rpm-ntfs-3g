@@ -4,7 +4,7 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.2712
+Version:	1.2918
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -123,11 +123,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Sep 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2918-1
+- update to 1.2918
+
+* Fri Aug 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2812-1
+- update to 1.2812
+
 * Sat Jul 12 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2712-1
 - update to 1.2712
-
-* Mon May  5 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2506-1.1
-- missing patch
 
 * Mon May  5 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2506-1
 - update to 1.2506
