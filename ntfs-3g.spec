@@ -4,11 +4,11 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.2918
+Version:	1.5012
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://www.ntfs-3g.org/%{name}-%{version}.tgz
+Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
 Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -46,7 +46,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 %patch0 -p1
 
 %build
@@ -123,8 +123,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
-* Mon Sep 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2918-1
-- update to 1.2918
+* Wed Oct 15 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5012-1
+- update to 1.5012 (same code as 1.2926-RC)
+
+* Mon Sep 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2926-0.1.RC
+- update to 1.2926-RC (rawhide, F10)
 
 * Fri Aug 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.2812-1
 - update to 1.2812
