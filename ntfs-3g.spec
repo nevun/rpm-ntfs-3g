@@ -5,10 +5,11 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.5012
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
+Source1:	20-ntfs-config-write-policy.fdi
 Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -95,6 +96,9 @@ mv $RPM_BUILD_ROOT/%{_lib}/pkgconfig/libntfs-3g.pc $RPM_BUILD_ROOT%{_libdir}/pkg
 # We get this on our own, thanks.
 rm -rf $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}/README
 
+mkdir -p $RPM_BUILD_ROOT%{_datadir}/hal/fdi/policy/10osvendor/
+cp -a %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/hal/fdi/policy/10osvendor/
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -115,6 +119,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/ntfsmount
 /%{_lib}/libntfs-3g.so.*
 %{_mandir}/man8/*
+%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
 
 %files devel
 %defattr(-,root,root,-)
@@ -123,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Oct 20 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5012-2
+- add fdi file to enable hal automounting
+
 * Wed Oct 15 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5012-1
 - update to 1.5012 (same code as 1.2926-RC)
 
