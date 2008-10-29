@@ -2,11 +2,9 @@
 <deviceinfo version="0.2">
    <device>
        <match key="volume.fstype" string="ntfs">
-           <match key="@block.storage_device:storage.hotpluggable" bool="true">
-               <merge key="volume.fstype" type="string">ntfs-3g</merge>
-               <merge key="volume.policy.mount_filesystem" type="string">ntfs-3g</merge>
-               <append key="volume.mount.valid_options" type="strlist">locale=</append>
-           </match>
+           <merge key="volume.fstype" type="string">ntfs-3g</merge>
+           <merge key="volume.policy.mount_filesystem" type="string">ntfs-3g</merge>
+           <append key="volume.mount.valid_options" type="strlist">locale=</append>
        </match>
    </device>
 </deviceinfo>
