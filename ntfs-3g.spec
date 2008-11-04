@@ -5,7 +5,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.5012
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
@@ -128,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Wed Oct 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5012-4
+- fix hal file to properly ignore internal recovery partitions
+
 * Wed Oct 29 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5012-3
 - fix hal file to cover all mount cases (thanks to Richard Hughes)
 
