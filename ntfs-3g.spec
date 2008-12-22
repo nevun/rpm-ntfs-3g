@@ -2,13 +2,15 @@
 # Default is internal fuse-lite.
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
+%define subrel RC
+
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.5130
-Release:	1%{?dist}
+Version:	1.5222
+Release:	0.1.%{subrel}%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
+Source0:	http://ntfs-3g.org/ntfs-3g-%{version}-%{subrel}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
 Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
@@ -47,7 +49,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-%{subrel}
 %patch0 -p1
 
 %build
@@ -128,6 +130,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Dec 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5222-0.1.RC
+- 1.5222-RC
+
 * Tue Dec  2 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5130-1
 - update to 1.5130
 
