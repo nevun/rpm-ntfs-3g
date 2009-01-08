@@ -5,7 +5,7 @@
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
 Version:	1.5130
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
@@ -17,7 +17,6 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
 %endif
-Requires:	pkgconfig
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
@@ -41,6 +40,7 @@ driver for Linux that supports unlimited file creation and deletion.
 Summary:	Development files and libraries for ntfs-3g
 Group:		Development/Libraries
 Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	pkgconfig
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g 
@@ -128,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Thu Jan  8 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5130-2
+- move pkgconfig Requires to -devel package where it belongs
+
 * Tue Dec  2 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5130-1
 - update to 1.5130
 
