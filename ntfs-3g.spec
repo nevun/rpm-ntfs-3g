@@ -4,8 +4,8 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	1.5130
-Release:	2%{?dist}
+Version:	2009.1.1
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
@@ -128,8 +128,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
-* Thu Jan  8 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5130-2
+* Fri Jan 30 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.1.1-1
+- new release, new versioning scheme from upstream
+
+* Thu Jan  8 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5222-0.2.RC
 - move pkgconfig Requires to -devel package where it belongs
+
+* Mon Dec 22 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5222-0.1.RC
+- 1.5222-RC
 
 * Tue Dec  2 2008 Tom "spot" Callaway <tcallawa@redhat.com> - 2:1.5130-1
 - update to 1.5130
