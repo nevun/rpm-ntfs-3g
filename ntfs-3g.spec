@@ -4,15 +4,13 @@
 
 Name:		ntfs-3g
 Summary: 	Linux NTFS userspace driver 
-Version:	2009.3.8
-Release:	2%{?dist}
+Version:	2009.4.4
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
 Patch0:		ntfs-3g-1.2216-nomtab.patch
-# Patch from upstream provided as temporary workaround for bz 486619
-Patch1:		mount-readlink-hang-workaround.diff
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{with_externalfuse}
@@ -51,7 +49,6 @@ functionality.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p0
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -131,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Fri Apr  3 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.4.4-1
+- update to 4.4, patch for mount issue merged
+
 * Mon Mar 30 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.3.8-2
 - Patch from upstream provided as temporary workaround for bz 486619
 
