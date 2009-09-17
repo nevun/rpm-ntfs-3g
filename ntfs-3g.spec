@@ -3,9 +3,9 @@
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
 Name:		ntfs-3g
-Summary: 	Linux NTFS userspace driver 
+Summary:	Linux NTFS userspace driver
 Version:	2009.4.4
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
@@ -23,17 +23,17 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 
 %description
-The ntfs-3g driver is an open source, GPL licensed, third generation 
-Linux NTFS driver. It provides full read-write access to NTFS, excluding 
-access to encrypted files, writing compressed files, changing file 
+The ntfs-3g driver is an open source, GPL licensed, third generation
+Linux NTFS driver. It provides full read-write access to NTFS, excluding
+access to encrypted files, writing compressed files, changing file
 ownership, access right.
 
-Technically it’s based on and a major improvement to the third 
-generation Linux NTFS driver, ntfsmount. The improvements include 
+Technically it’s based on and a major improvement to the third
+generation Linux NTFS driver, ntfsmount. The improvements include
 functionality, quality and performance enhancements.
 
-ntfs-3g features are being merged to ntfsmount. In the meanwhile, 
-ntfs-3g is currently the only free, as in either speech or beer, NTFS 
+ntfs-3g features are being merged to ntfsmount. In the meanwhile,
+ntfs-3g is currently the only free, as in either speech or beer, NTFS
 driver for Linux that supports unlimited file creation and deletion.
 
 %package devel
@@ -43,7 +43,7 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 
 %description devel
-Headers and libraries for developing applications that use ntfs-3g 
+Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
@@ -128,6 +128,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Thu Sep 17 2009 Peter Lemenkov <lemenkov@gmail.com> - 2:2009.4.4-3
+- Rebuilt with new fuse
+
 * Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2009.4.4-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
 
