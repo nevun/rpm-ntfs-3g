@@ -3,12 +3,12 @@
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
 Name:		ntfs-3g
-Summary: 	Linux NTFS userspace driver 
-Version:	2009.4.4
+Summary:	Linux NTFS userspace driver
+Version:	2009.11.14
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://ntfs-3g.org/ntfs-3g-%{version}.tgz
+Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
 Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
@@ -17,23 +17,24 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
 %endif
+BuildRequires:	libtool
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 
 %description
-The ntfs-3g driver is an open source, GPL licensed, third generation 
-Linux NTFS driver. It provides full read-write access to NTFS, excluding 
-access to encrypted files, writing compressed files, changing file 
+The ntfs-3g driver is an open source, GPL licensed, third generation
+Linux NTFS driver. It provides full read-write access to NTFS, excluding
+access to encrypted files, writing compressed files, changing file
 ownership, access right.
 
-Technically it’s based on and a major improvement to the third 
-generation Linux NTFS driver, ntfsmount. The improvements include 
+Technically it’s based on and a major improvement to the third
+generation Linux NTFS driver, ntfsmount. The improvements include
 functionality, quality and performance enhancements.
 
-ntfs-3g features are being merged to ntfsmount. In the meanwhile, 
-ntfs-3g is currently the only free, as in either speech or beer, NTFS 
+ntfs-3g features are being merged to ntfsmount. In the meanwhile,
+ntfs-3g is currently the only free, as in either speech or beer, NTFS
 driver for Linux that supports unlimited file creation and deletion.
 
 %package devel
@@ -43,7 +44,7 @@ Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 
 %description devel
-Headers and libraries for developing applications that use ntfs-3g 
+Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
@@ -62,12 +63,13 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--libdir=/%{_lib}
-make %{?_smp_mflags}
+make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 
 %install
 rm -rf $RPM_BUILD_ROOT
 make DESTDIR=$RPM_BUILD_ROOT install
 rm -rf $RPM_BUILD_ROOT/%{_lib}/*.la
+rm -rf $RPM_BUILD_ROOT/%{_lib}/*.a
 
 # make the symlink an actual copy to avoid confusion
 rm -rf $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
@@ -115,6 +117,8 @@ rm -rf $RPM_BUILD_ROOT
 /bin/ntfs-3g
 /bin/ntfsmount
 /bin/ntfs-3g.probe
+/bin/ntfs-3g.secaudit
+/bin/ntfs-3g.usermap
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
 /%{_lib}/libntfs-3g.so.*
@@ -128,6 +132,18 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Fri Nov 20 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.11.14-1
+- update to 2009.11.14
+
+* Fri Oct 30 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.10.5-0.1.RC
+- bump to 2009.10.5-RC
+
+* Thu Sep 17 2009 Peter Lemenkov <lemenkov@gmail.com> - 2:2009.4.4-3
+- Rebuilt with new fuse
+
+* Sat Jul 25 2009 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2009.4.4-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_12_Mass_Rebuild
+
 * Fri Apr  3 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.4.4-1
 - update to 4.4, patch for mount issue merged
 
