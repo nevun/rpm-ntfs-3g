@@ -4,8 +4,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2009.11.14
-Release:	2%{?dist}
+Version:	2010.1.16
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}.tgz
@@ -132,6 +132,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Wed Jan 20 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.1.16-1
+- update to 2010.1.16
+
 * Fri Nov 20 2009 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2009.11.14-2
 - missing BuildRequires: libattr-devel
 
