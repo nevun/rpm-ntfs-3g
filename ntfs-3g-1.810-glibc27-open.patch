@@ -1,0 +1,12 @@
+diff -up ntfs-3g-1.810/libntfs-3g/volume.c.BAD ntfs-3g-1.810/libntfs-3g/volume.c
+--- ntfs-3g-1.810/libntfs-3g/volume.c.BAD	2007-08-24 13:05:27.000000000 -0400
++++ ntfs-3g-1.810/libntfs-3g/volume.c	2007-08-24 13:05:39.000000000 -0400
+@@ -457,7 +457,7 @@ ntfs_volume *ntfs_volume_startup(struct 
+ 	if (flags & MS_NOATIME)
+ 		NVolSetNoATime(vol);
+ 	ntfs_log_debug("Reading bootsector... ");
+-	if (dev->d_ops->open(dev, NVolReadOnly(vol) ? O_RDONLY: O_RDWR)) {
++	if ((dev->d_ops->open)(dev, NVolReadOnly(vol) ? O_RDONLY: O_RDWR)) {
+ 		ntfs_log_debug(FAILED);
+ 		ntfs_log_perror("Error opening partition device");
+ 		goto error_exit;
