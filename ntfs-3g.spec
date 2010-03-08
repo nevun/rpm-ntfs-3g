@@ -2,13 +2,16 @@
 # Default is internal fuse-lite.
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
+# For release candidates
+# %%global subver -RC
+
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2010.1.16
+Version:	2010.3.6
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}.tgz
+Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}%{?subver}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
 Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
@@ -24,18 +27,15 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 
 %description
-The ntfs-3g driver is an open source, GPL licensed, third generation
-Linux NTFS driver. It provides full read-write access to NTFS, excluding
-access to encrypted files, writing compressed files, changing file
-ownership, access right.
-
-Technically it’s based on and a major improvement to the third
-generation Linux NTFS driver, ntfsmount. The improvements include
-functionality, quality and performance enhancements.
-
-ntfs-3g features are being merged to ntfsmount. In the meanwhile,
-ntfs-3g is currently the only free, as in either speech or beer, NTFS
-driver for Linux that supports unlimited file creation and deletion.
+NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
+driver for Linux and many other operating systems. It provides safe 
+handling of the Windows XP, Windows Server 2003, Windows 2000, Windows 
+Vista, Windows Server 2008 and Windows 7 NTFS file systems. NTFS-3G can 
+create, remove, rename, move files, directories, hard links, and streams; 
+it can read and write normal and transparently compressed files, including 
+streams and sparse files; it can handle special files like symbolic links, 
+devices, and FIFOs, ACL, extended attributes; moreover it provides full 
+file access right and ownership support.
 
 %package devel
 Summary:	Development files and libraries for ntfs-3g
@@ -48,7 +48,7 @@ Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}%{?subver}
 %patch0 -p1
 
 %build
@@ -132,6 +132,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Mar  8 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.3.6-1
+- update to 2010.3.6
+
+* Mon Feb 15 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.2.6-1
+- update to 2010.2.6-RC
+- fix summary text
+
 * Wed Jan 20 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.1.16-1
 - update to 2010.1.16
 
