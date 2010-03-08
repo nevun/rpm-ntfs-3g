@@ -3,11 +3,11 @@
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
 # For release candidates
-%global subver -RC
+# %%global subver -RC
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2010.2.6
+Version:	2010.3.6
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -132,6 +132,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Mon Mar  8 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.3.6-1
+- update to 2010.3.6
+
 * Mon Feb 15 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.2.6-1
 - update to 2010.2.6-RC
 - fix summary text
