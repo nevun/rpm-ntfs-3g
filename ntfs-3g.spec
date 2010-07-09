@@ -7,7 +7,7 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2010.3.6
+Version:	2010.5.22
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -114,11 +114,13 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/mount.ntfs
 %attr(754,root,root) /sbin/mount.ntfs-3g
 /sbin/mount.ntfs-fuse
+/sbin/mount.lowntfs-3g
 /bin/ntfs-3g
 /bin/ntfsmount
 /bin/ntfs-3g.probe
 /bin/ntfs-3g.secaudit
 /bin/ntfs-3g.usermap
+/bin/lowntfs-3g
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
 /%{_lib}/libntfs-3g.so.*
@@ -132,6 +134,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Fri Jul  9 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.5.22-1
+- update to 2010.5.22
+
+* Tue May 18 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.5.16-1
+- update to 2010.5.16
+- fix makefile to build secaudit/usermap tools
+
 * Mon Mar  8 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.3.6-1
 - update to 2010.3.6
 
