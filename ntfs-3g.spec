@@ -7,7 +7,7 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2010.10.2
+Version:	2011.1.15
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
@@ -132,6 +132,9 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Tue Jan 25 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.1.15-1
+- update to 2011.1.15
+
 * Mon Oct 11 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.10.2-1
 - update to 2010.10.2, all patches merged upstream
 
