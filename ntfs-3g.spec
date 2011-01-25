@@ -7,13 +7,12 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2010.5.22
+Version:	2011.1.15
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}%{?subver}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
-Patch0:		ntfs-3g-1.2216-nomtab.patch
 URL:		http://www.ntfs-3g.org/
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{with_externalfuse}
@@ -49,7 +48,6 @@ functionality.
 
 %prep
 %setup -q -n %{name}-%{version}%{?subver}
-%patch0 -p1
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -134,6 +132,21 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %changelog
+* Tue Jan 25 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.1.15-1
+- update to 2011.1.15
+
+* Mon Oct 11 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.10.2-1
+- update to 2010.10.2, all patches merged upstream
+
+* Thu Sep  9 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.8.8-2
+- add support for context= mount option (Till Maas) (bz502946)
+
+* Mon Aug  9 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.8.8-1
+- update to 2010.8.8
+
+* Fri Jul  9 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.6.31-1
+- update to 2010.6.31-RC
+
 * Fri Jul  9 2010 Tom "spot" Callaway <tcallawa@redhat.com> - 2:2010.5.22-1
 - update to 2010.5.22
 
