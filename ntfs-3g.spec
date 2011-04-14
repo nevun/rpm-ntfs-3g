@@ -20,8 +20,6 @@ BuildRequires:	fuse-devel
 Requires:	fuse
 %endif
 BuildRequires:	libtool, libattr-devel
-# ntfsprogs BuildRequires
-BuildRequires:  libgcrypt-devel, gnutls-devel
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
@@ -78,7 +76,6 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--exec-prefix=/ \
 	--bindir=/bin \
 	--sbindir=/sbin \
-	--enable-crypto \
 	--libdir=/%{_lib}
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 pushd ntfsprogs
@@ -125,7 +122,8 @@ mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 
 # Install the "extra" binaries
-for i in ntfsck ntfsdecrypt ntfsdump_logfile ntfsmftalloc ntfsmove ntfstruncate ntfswipe; do
+# except ntfsdecrypt on EL-5, because gnutls is too old
+for i in ntfsck ntfsdump_logfile ntfsmftalloc ntfsmove ntfstruncate ntfswipe; do
 	install -m755 ntfsprogs/$i %{buildroot}/bin/
 done
 
@@ -173,7 +171,6 @@ rm -rf %{buildroot}
 /bin/ntfsls
 # Extras
 /bin/ntfsck
-/bin/ntfsdecrypt
 /bin/ntfsdump_logfile
 /bin/ntfsmftalloc
 /bin/ntfsmove
@@ -193,6 +190,7 @@ rm -rf %{buildroot}
 %changelog
 * Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1.1
 - fix up BR for el5
+- drop ntfsdecrypt (gnutls is too old in el5)
 
 * Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1
 - update to 2011.4.12
