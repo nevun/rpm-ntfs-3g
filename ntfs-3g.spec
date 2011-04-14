@@ -21,7 +21,7 @@ Requires:	fuse
 %endif
 BuildRequires:	libtool, libattr-devel
 # ntfsprogs BuildRequires
-BuildRequires:  libgcrypt-devel, gnutls-devel, libuuid-devel
+BuildRequires:  libgcrypt-devel, gnutls-devel
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
