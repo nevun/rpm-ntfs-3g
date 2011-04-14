@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2011.4.12
-Release:	1%{?dist}
+Release:	1%{?dist}.1
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -21,7 +21,7 @@ Requires:	fuse
 %endif
 BuildRequires:	libtool, libattr-devel
 # ntfsprogs BuildRequires
-BuildRequires:  libconfig-devel, libgcrypt-devel, gnutls-devel, libuuid-devel
+BuildRequires:  libgcrypt-devel, gnutls-devel, libuuid-devel
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
@@ -191,6 +191,9 @@ rm -rf %{buildroot}
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1.1
+- fix up BR for el5
+
 * Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1
 - update to 2011.4.12
 - pickup ntfsprogs and obsolete the old separate packages
