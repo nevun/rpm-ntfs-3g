@@ -1,0 +1,20 @@
+diff -up ntfs-3g_ntfsprogs-2011.4.12/ntfsprogs/ntfsck.c.header-fix ntfs-3g_ntfsprogs-2011.4.12/ntfsprogs/ntfsck.c
+--- ntfs-3g_ntfsprogs-2011.4.12/ntfsprogs/ntfsck.c.header-fix	2011-04-14 12:20:03.884433071 -0400
++++ ntfs-3g_ntfsprogs-2011.4.12/ntfsprogs/ntfsck.c	2011-04-14 12:20:42.779958187 -0400
+@@ -37,11 +37,11 @@
+ #include <fcntl.h>
+ #endif
+ 
+-#include <ntfs-3g/layout.h>
+-#include <ntfs-3g/bitmap.h>
+-#include <ntfs-3g/endians.h>
+-#include <ntfs-3g/bootsect.h>
+-#include <ntfs-3g/misc.h>
++#include <layout.h>
++#include <bitmap.h>
++#include <endians.h>
++#include <bootsect.h>
++#include <misc.h>
+ 
+ #include "cluster.h"
+ #include "utils.h"
