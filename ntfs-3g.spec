@@ -7,23 +7,25 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2011.1.15
+Version:	2011.4.12
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://tuxera.com/opensource/ntfs-3g-%{version}%{?subver}.tgz
+Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
 Source1:	20-ntfs-config-write-policy.fdi
 URL:		http://www.ntfs-3g.org/
-BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
 %endif
 BuildRequires:	libtool, libattr-devel
+# ntfsprogs BuildRequires
+BuildRequires:  libconfig-devel, libgcrypt-devel, gnutls-devel, libuuid-devel
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
+Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -41,13 +43,28 @@ Summary:	Development files and libraries for ntfs-3g
 Group:		Development/Libraries
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
+Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
+Obsoletes:	ntfsprogs-devel
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
+%package -n ntfsprogs
+Summary:	NTFS filesystem libraries and utilities
+Group:		System Environment/Base
+# We don't really provide this. This code is dead and buried now.
+Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
+Obsoletes:	ntfsprogs-gnomevfs
+
+%description -n ntfsprogs
+The ntfsprogs package currently consists of a library and utilities such as 
+mkntfs, ntfscat, ntfsls, ntfsresize, and ntfsundelete (for a full list of 
+included utilities see man 8 ntfsprogs after installation).
+
 %prep
-%setup -q -n %{name}-%{version}%{?subver}
+%setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
+%patch0 -p1 -b .header-fix
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -60,54 +77,60 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--exec-prefix=/ \
 	--bindir=/bin \
 	--sbindir=/sbin \
+	--enable-crypto \
 	--libdir=/%{_lib}
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
+pushd ntfsprogs
+make %{?_smp_mflags} extras
+popd
 
 %install
-rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT install
-rm -rf $RPM_BUILD_ROOT/%{_lib}/*.la
-rm -rf $RPM_BUILD_ROOT/%{_lib}/*.a
+make DESTDIR=%{buildroot} install
+rm -rf %{buildroot}/%{_lib}/*.la
+rm -rf %{buildroot}/%{_lib}/*.a
 
 # make the symlink an actual copy to avoid confusion
-rm -rf $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
-cp -a $RPM_BUILD_ROOT/bin/ntfs-3g $RPM_BUILD_ROOT/sbin/mount.ntfs-3g
+rm -rf %{buildroot}/sbin/mount.ntfs-3g
+cp -a %{buildroot}/bin/ntfs-3g %{buildroot}/sbin/mount.ntfs-3g
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
-cd $RPM_BUILD_ROOT/bin
+pushd %{buildroot}/bin
 ln -s ntfs-3g ntfsmount
-cd $RPM_BUILD_ROOT/sbin
+popd
+pushd %{buildroot}/sbin
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
 ln -s mount.ntfs-3g mount.ntfs
+popd
 
 # Compat symlinks
-mkdir -p $RPM_BUILD_ROOT%{_bindir}
-cd $RPM_BUILD_ROOT%{_bindir}
+mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
 ln -s /bin/ntfs-3g ntfs-3g
 ln -s /bin/ntfsmount ntfsmount
+popd
 
 # Put the .pc file in the right place.
-mkdir -p $RPM_BUILD_ROOT%{_libdir}/pkgconfig/
-mv $RPM_BUILD_ROOT/%{_lib}/pkgconfig/libntfs-3g.pc $RPM_BUILD_ROOT%{_libdir}/pkgconfig/
+mkdir -p %{buildroot}%{_libdir}/pkgconfig/
+mv %{buildroot}/%{_lib}/pkgconfig/libntfs-3g.pc %{buildroot}%{_libdir}/pkgconfig/
 
 # We get this on our own, thanks.
-rm -rf $RPM_BUILD_ROOT%{_defaultdocdir}/%{name}/README
+rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/hal/fdi/policy/10osvendor/
-cp -a %{SOURCE1} $RPM_BUILD_ROOT%{_datadir}/hal/fdi/policy/10osvendor/
+mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
+cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+# Install the "extra" binaries
+for i in ntfsck ntfsdecrypt ntfsdump_logfile ntfsmftalloc ntfsmove ntfstruncate ntfswipe; do
+	install -m755 ntfsprogs/$i %{buildroot}/bin/
+done
 
 %post -p /sbin/ldconfig
-
 %postun -p /sbin/ldconfig
 
 %files
-%defattr(-,root,root,-)
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
 /sbin/mount.ntfs
 %attr(754,root,root) /sbin/mount.ntfs-3g
@@ -122,16 +145,51 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
 /%{_lib}/libntfs-3g.so.*
-%{_mandir}/man8/*
+%{_mandir}/man8/mount.lowntfs-3g.*
+%{_mandir}/man8/mount.ntfs-3g.*
+%{_mandir}/man8/ntfs-3g*
 %{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
 
 %files devel
-%defattr(-,root,root,-)
 %{_includedir}/ntfs-3g/
 /%{_lib}/libntfs-3g.so
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
+%files -n ntfsprogs
+%doc AUTHORS COPYING CREDITS ChangeLog NEWS README
+/bin/ntfscat
+/bin/ntfscluster
+/bin/ntfscmp
+/bin/ntfsfix
+/bin/ntfsinfo
+/bin/ntfsls
+# Extras
+/bin/ntfsck
+/bin/ntfsdecrypt
+/bin/ntfsdump_logfile
+/bin/ntfsmftalloc
+/bin/ntfsmove
+/bin/ntfstruncate
+/bin/ntfswipe
+/sbin/mkfs.ntfs
+/sbin/mkntfs
+/sbin/ntfsclone
+/sbin/ntfscp
+/sbin/ntfslabel
+/sbin/ntfsresize
+/sbin/ntfsundelete
+%{_mandir}/man8/mkntfs.8*
+%{_mandir}/man8/mkfs.ntfs.8*
+%{_mandir}/man8/ntfs[^m][^o]*.8*
+
 %changelog
+* Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1
+- update to 2011.4.12
+- pickup ntfsprogs and obsolete the old separate packages
+
+* Tue Feb 08 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2011.1.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
+
 * Tue Jan 25 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.1.15-1
 - update to 2011.1.15
 
