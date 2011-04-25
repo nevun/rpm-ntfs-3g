@@ -25,7 +25,7 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
-Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option.patch
+Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option-full.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
