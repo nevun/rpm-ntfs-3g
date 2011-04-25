@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2011.4.12
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -26,6 +26,7 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
+Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -65,6 +66,7 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .header-fix
+%patch1 -p1 -b .enable-extras
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -78,14 +80,12 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--bindir=/bin \
 	--sbindir=/sbin \
 	--enable-crypto \
+	--enable-extras \
 	--libdir=/%{_lib}
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
-pushd ntfsprogs
-make %{?_smp_mflags} extras
-popd
 
 %install
-make DESTDIR=%{buildroot} install
+make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
 rm -rf %{buildroot}/%{_lib}/*.la
 rm -rf %{buildroot}/%{_lib}/*.a
 
@@ -121,11 +121,6 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
 mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-
-# Install the "extra" binaries
-for i in ntfsck ntfsdecrypt ntfsdump_logfile ntfsmftalloc ntfsmove ntfstruncate ntfswipe; do
-	install -m755 ntfsprogs/$i %{buildroot}/bin/
-done
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
@@ -183,6 +178,9 @@ done
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Mon Apr 25 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-2
+- add --enable-extras flag (and use it) to ensure proper binary installation
+
 * Thu Apr 14 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-1
 - update to 2011.4.12
 - pickup ntfsprogs and obsolete the old separate packages
