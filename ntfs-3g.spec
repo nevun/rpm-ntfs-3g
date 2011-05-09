@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2011.4.12
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -44,7 +44,7 @@ Group:		Development/Libraries
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
-Obsoletes:	ntfsprogs-devel
+Obsoletes:	ntfsprogs-devel < %{epoch}:%{version}-%{release}
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g
@@ -56,6 +56,8 @@ Group:		System Environment/Base
 # We don't really provide this. This code is dead and buried now.
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
+# Needed to fix multilib issue
+Obsoletes:	ntfsprogs < %{epoch}:%{version}-%{release}
 
 %description -n ntfsprogs
 The ntfsprogs package currently consists of a library and utilities such as 
@@ -182,6 +184,9 @@ rm -rf %{buildroot}
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Mon May  9 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-3
+- add Obsoletes to resolve multi-lib upgrade issue (bz702671)
+
 * Mon Apr 25 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-2
 - add --enable-extras flag (and use it) to ensure proper binary installation
 
