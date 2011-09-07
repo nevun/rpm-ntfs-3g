@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2011.4.12
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -27,6 +27,14 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
 Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option-full.patch
+# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=commit;h=571dbc5784af042c94ed0f025c4d2d842c591d1f
+# https://bugzilla.redhat.com/show_bug.cgi?id=735862
+Patch2:		ntfs-3g_ntfsprogs-571dbc5784af042c94ed0f025c4d2d842c591d1f.patch
+# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsck.c;h=0964a4de57a385308f9b5bf61b04b25812e17b7f;hp=ff6946dfe286a87e0dafd4c6a509a8b7bc69625e;hb=HEAD;hpb=0289d1a6c31942609b96fdf2c1baeb7355fee2bc
+Patch3:		ntfsprogs-ntfsck-cleanups-from-git.patch
+# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsfix.c;h=9b3d5eeb368ff85fa6ef3c18b44c2dcc2ba5ea07;hp=97a14a59b6318c0f2baa1c7a111bde3254e42d5a;hb=HEAD;hpb=44116675cad2055b326a9ac797c5105d78896475
+# bz 711662, 723562
+Patch4:		ntfsprogs-ntfsfix-cleanups-from-git.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -69,6 +77,10 @@ included utilities see man 8 ntfsprogs after installation).
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .header-fix
 %patch1 -p1 -b .enable-extras
+%patch2 -p1 -b .735862
+%patch3 -p1 -b .fsckfixes
+%patch4 -p1 -b .ntfsfixfixes
+autoreconf -if
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -105,6 +117,8 @@ ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
 ln -s mount.ntfs-3g mount.ntfs
+# Need this for fsck to find it
+ln -s ../ntfsck fsck.ntfs
 popd
 
 # Compat symlinks
@@ -168,6 +182,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsmove
 /bin/ntfstruncate
 /bin/ntfswipe
+/sbin/fsck.ntfs
 /sbin/mkfs.ntfs
 /sbin/mkntfs
 /sbin/ntfsclone
@@ -180,6 +195,12 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Wed Sep  7 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-4
+- fix issue preventing some volume types from not working properly (bz735862)
+- create fsck.ntfs symlink to ntfsck (bz735612).
+- apply cleanups from git trunk for ntfsck (bz 706638)
+- apply cleanups from git trunk for ntfsfix (bz 711662, 723562)
+
 * Mon May  9 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-3
 - add Obsoletes to resolve multi-lib upgrade issue (bz702671)
 
