@@ -19,7 +19,7 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:	fuse-devel
 Requires:	fuse
 %endif
-BuildRequires:	libtool, libattr-devel, libgcrypt-devel
+BuildRequires:	libtool, libattr-devel
 Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
@@ -28,7 +28,7 @@ Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
 Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option-full.patch
 # http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=commit;h=571dbc5784af042c94ed0f025c4d2d842c591d1f
 # https://bugzilla.redhat.com/show_bug.cgi?id=735862
-Patch2:		ntfs-3g_ntfsprogs-571dbc5784af042c94ed0f025c4d2d842c591d1f.patch
+Patch2:		ntfs-3g_ntfsprogs-571dbc5784af042c94ed0f025c4d2d842c591d1f-noautoreconf.patch
 # http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsck.c;h=0964a4de57a385308f9b5bf61b04b25812e17b7f;hp=ff6946dfe286a87e0dafd4c6a509a8b7bc69625e;hb=HEAD;hpb=0289d1a6c31942609b96fdf2c1baeb7355fee2bc
 Patch3:		ntfsprogs-ntfsck-cleanups-from-git.patch
 # http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsfix.c;h=9b3d5eeb368ff85fa6ef3c18b44c2dcc2ba5ea07;hp=97a14a59b6318c0f2baa1c7a111bde3254e42d5a;hb=HEAD;hpb=44116675cad2055b326a9ac797c5105d78896475
@@ -79,7 +79,6 @@ included utilities see man 8 ntfsprogs after installation).
 %patch2 -p1 -b .735862
 %patch3 -p1 -b .fsckfixes
 %patch4 -p1 -b .ntfsfixfixes
-autoreconf -if
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
