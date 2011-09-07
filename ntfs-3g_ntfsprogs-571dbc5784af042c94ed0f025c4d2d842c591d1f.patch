@@ -1,0 +1,362 @@
+From 571dbc5784af042c94ed0f025c4d2d842c591d1f Mon Sep 17 00:00:00 2001
+From: =?utf8?q?Jean-Pierre=20Andr=C3=A9?= <jpandre@users.sourceforge.net>
+Date: Tue, 5 Jul 2011 12:17:12 +0200
+Subject: [PATCH] Fixed device path canonicalization for use by devmapper (basilinya)
+
+For some reason, when the monted device is "/dev/mapper/*", a record
+in the form "/dev/dm-*" ends up in /etc/mtab and the device cannot be
+unmounted.
+
+The reason is unclear, the /dev/mapper name is not a symlink, and the
+function doing the name change is not known. No detailed feedback from
+the users having met the issue.
+
+The patch changes the name back to the /dev/mapper name after realpath()
+is called, and, if there is an actual change, both the name passed to
+ntfs-3g and the one passed to fuse and mount are logged in the hope
+of getting a clue about what is happening.
+
+But ntfs-3g is probably not the right place for a fix.
+---
+ include/ntfs-3g/Makefile.am |    1 +
+ include/ntfs-3g/param.h     |    5 ++
+ include/ntfs-3g/realpath.h  |   24 ++++++++++
+ libntfs-3g/Makefile.am      |    1 +
+ libntfs-3g/realpath.c       |  103 +++++++++++++++++++++++++++++++++++++++++++
+ libntfs-3g/volume.c         |   17 +------
+ src/lowntfs-3g.c            |   13 +----
+ src/ntfs-3g.c               |   13 +----
+ src/ntfs-3g_common.c        |    5 ++-
+ src/ntfs-3g_common.h        |    1 +
+ 10 files changed, 148 insertions(+), 35 deletions(-)
+ create mode 100644 include/ntfs-3g/realpath.h
+ create mode 100644 libntfs-3g/realpath.c
+
+diff --git a/include/ntfs-3g/Makefile.am b/include/ntfs-3g/Makefile.am
+index 6067346..33343df 100644
+--- a/include/ntfs-3g/Makefile.am
++++ b/include/ntfs-3g/Makefile.am
+@@ -29,6 +29,7 @@ headers = \
+ 	ntfstime.h	\
+ 	object_id.h	\
+ 	param.h	\
++	realpath.h	\
+ 	reparse.h	\
+ 	runlist.h	\
+ 	security.h	\
+diff --git a/include/ntfs-3g/param.h b/include/ntfs-3g/param.h
+index 57d122e..985fdb7 100644
+--- a/include/ntfs-3g/param.h
++++ b/include/ntfs-3g/param.h
+@@ -63,6 +63,11 @@ enum {
+ 
+ #define XATTRMAPPINGFILE ".NTFS-3G/XattrMapping" /* default mapping file */
+ 
++/*
++ *		Parameters for path canonicalization
++ */
++
++#define MAPPERNAMELTH 256
+ 
+ /*
+  *		Permission checking modes for high level and low level
+diff --git a/include/ntfs-3g/realpath.h b/include/ntfs-3g/realpath.h
+new file mode 100644
+index 0000000..970d2af
+--- /dev/null
++++ b/include/ntfs-3g/realpath.h
+@@ -0,0 +1,24 @@
++/*
++ * realpath.h - realpath() aware of device mapper
++ */
++
++#ifndef REALPATH_H
++#define REALPATH_H
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#ifdef HAVE_REALPATH
++#define ntfs_realpath realpath
++#else
++extern char *ntfs_realpath(const char *path, char *resolved_path);
++#endif
++
++#ifdef linux
++extern char *ntfs_realpath_canonicalize(const char *path, char *resolved_path);
++#else
++#define ntfs_realpath_canonicalize ntfs_realpath
++#endif
++
++#endif /* REALPATH_H */
+diff --git a/libntfs-3g/Makefile.am b/libntfs-3g/Makefile.am
+index 292233a..b84cf64 100644
+--- a/libntfs-3g/Makefile.am
++++ b/libntfs-3g/Makefile.am
+@@ -36,6 +36,7 @@ libntfs_3g_la_SOURCES =	\
+ 	misc.c 		\
+ 	mst.c 		\
+ 	object_id.c 	\
++	realpath.c	\
+ 	reparse.c 	\
+ 	runlist.c 	\
+ 	security.c 	\
+diff --git a/libntfs-3g/realpath.c b/libntfs-3g/realpath.c
+new file mode 100644
+index 0000000..a93bc69
+--- /dev/null
++++ b/libntfs-3g/realpath.c
+@@ -0,0 +1,103 @@
++/*
++ * realpath.c - realpath() aware of device mapper
++ * Originated from the util-linux project.
++ */
++
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <string.h>
++
++#ifdef HAVE_LIMITS_H
++#include <limits.h>
++#endif
++#ifdef HAVE_CTYPE_H
++#include <ctype.h>
++#endif
++
++#include "param.h"
++#include "realpath.h"
++
++/* If there is no realpath() on the system, provide a dummy one. */
++#ifndef HAVE_REALPATH
++char *ntfs_realpath(const char *path, char *resolved_path)
++{
++       strncpy(resolved_path, path, PATH_MAX);
++       resolved_path[PATH_MAX] = '\0';
++       return resolved_path;
++}
++#endif
++
++
++#ifdef linux
++
++/*
++ * Converts private "dm-N" names to "/dev/mapper/<name>"
++ *
++ * Since 2.6.29 (patch 784aae735d9b0bba3f8b9faef4c8b30df3bf0128) kernel sysfs
++ * provides the real DM device names in /sys/block/<ptname>/dm/name
++ */
++static char *
++canonicalize_dm_name(const char *ptname, char *canonical)
++{
++	FILE	*f;
++	size_t	sz;
++	char	path[MAPPERNAMELTH + 24];
++	char	name[MAPPERNAMELTH + 16];
++	char	*res = NULL;
++
++	snprintf(path, sizeof(path), "/sys/block/%s/dm/name", ptname);
++	if (!(f = fopen(path, "r")))
++		return NULL;
++
++	/* read "<name>\n" from sysfs */
++	if (fgets(name, sizeof(name), f) && (sz = strlen(name)) > 1) {
++		name[sz - 1] = '\0';
++		snprintf(path, sizeof(path), "/dev/mapper/%s", name);
++		res = strcpy(canonical, path);
++	}
++	fclose(f);
++	return res;
++}
++
++/*
++ *		Canonicalize a device path
++ *
++ *	Workaround from "basinilya" for fixing device mapper paths.
++ *
++ *  Background (Phillip Susi, 2011-04-09)
++ *	- ntfs-3g canonicalizes the device name so that if you mount with
++ *	  /dev/mapper/foo, the device name listed in mtab is /dev/dm-n,
++ *	  so you can not umount /dev/mapper/foo
++ *	- umount won't even recognize and translate /dev/dm-n to the mount
++ *	  point, apparently because of the '-' involved. Editing mtab and
++ *	  removing the '-' allows you to umount /dev/dmn successfully.
++ *
++ *	This code restores the devmapper name after canonicalization,
++ *	until a proper fix is implemented.
++ */
++
++char *ntfs_realpath_canonicalize(const char *path, char *canonical)
++{
++	char *p;
++
++	if (path == NULL)
++		return NULL;
++
++	if (!ntfs_realpath(path, canonical))
++		return NULL;
++
++	p = strrchr(canonical, '/');
++	if (p && strncmp(p, "/dm-", 4) == 0 && isdigit(*(p + 4))) {
++		p = canonicalize_dm_name(p+1, canonical);
++		if (p)
++			return p;
++	}
++
++	return canonical;
++}
++
++#endif
+diff --git a/libntfs-3g/volume.c b/libntfs-3g/volume.c
+index 28e4c90..ca30585 100644
+--- a/libntfs-3g/volume.c
++++ b/libntfs-3g/volume.c
+@@ -67,6 +67,7 @@
+ #include "dir.h"
+ #include "logging.h"
+ #include "cache.h"
++#include "realpath.h"
+ #include "misc.h"
+ 
+ const char *ntfs_home = 
+@@ -1359,18 +1360,6 @@ int ntfs_umount(ntfs_volume *vol, const BOOL force __attribute__((unused)))
+ 
+ #ifdef HAVE_MNTENT_H
+ 
+-#ifndef HAVE_REALPATH
+-/**
+- * realpath - If there is no realpath on the system
+- */
+-static char *realpath(const char *path, char *resolved_path)
+-{
+-	strncpy(resolved_path, path, PATH_MAX);
+-	resolved_path[PATH_MAX] = '\0';
+-	return resolved_path;
+-}
+-#endif
+-
+ /**
+  * ntfs_mntent_check - desc
+  *
+@@ -1394,7 +1383,7 @@ static int ntfs_mntent_check(const char *file, unsigned long *mnt_flags)
+ 		err = errno;
+ 		goto exit;
+ 	}
+-	if (!realpath(file, real_file)) {
++	if (!ntfs_realpath_canonicalize(file, real_file)) {
+ 		err = errno;
+ 		goto exit;
+ 	}
+@@ -1403,7 +1392,7 @@ static int ntfs_mntent_check(const char *file, unsigned long *mnt_flags)
+ 		goto exit;
+ 	}
+ 	while ((mnt = getmntent(f))) {
+-		if (!realpath(mnt->mnt_fsname, real_fsname))
++		if (!ntfs_realpath_canonicalize(mnt->mnt_fsname, real_fsname))
+ 			continue;
+ 		if (!strcmp(real_file, real_fsname))
+ 			break;
+diff --git a/src/lowntfs-3g.c b/src/lowntfs-3g.c
+index aeadb17..9fa177f 100644
+--- a/src/lowntfs-3g.c
++++ b/src/lowntfs-3g.c
+@@ -3457,16 +3457,6 @@ static void usage(void)
+ 			EXEC_NAME, ntfs_home);
+ }
+ 
+-#ifndef HAVE_REALPATH
+-/* If there is no realpath() on the system, provide a dummy one. */
+-static char *realpath(const char *path, char *resolved_path)
+-{
+-	strncpy(resolved_path, path, PATH_MAX);
+-	resolved_path[PATH_MAX] = '\0';
+-	return resolved_path;
+-}
+-#endif
+-
+ #if defined(linux) || defined(__uClinux__)
+ 
+ static const char *dev_fuse_msg =
+@@ -3668,6 +3658,9 @@ static void setup_logging(char *parsed_options)
+ 	ctx->seccache = (struct PERMISSIONS_CACHE*)NULL;
+ 
+ 	ntfs_log_info("Version %s %s %d\n", VERSION, FUSE_TYPE, fuse_version());
++	if (strcmp(opts.arg_device,opts.device))
++		ntfs_log_info("Requested device %s canonicalized as %s\n",
++				opts.arg_device,opts.device);
+ 	ntfs_log_info("Mounted %s (%s, label \"%s\", NTFS %d.%d)\n",
+ 			opts.device, (ctx->ro) ? "Read-Only" : "Read-Write",
+ 			ctx->vol->vol_name, ctx->vol->major_ver,
+diff --git a/src/ntfs-3g.c b/src/ntfs-3g.c
+index 80c084d..956f04d 100644
+--- a/src/ntfs-3g.c
++++ b/src/ntfs-3g.c
+@@ -3372,16 +3372,6 @@ static void usage(void)
+ 			EXEC_NAME, ntfs_home);
+ }
+ 
+-#ifndef HAVE_REALPATH
+-/* If there is no realpath() on the system, provide a dummy one. */
+-static char *realpath(const char *path, char *resolved_path)
+-{
+-	strncpy(resolved_path, path, PATH_MAX);
+-	resolved_path[PATH_MAX] = '\0';
+-	return resolved_path;
+-}
+-#endif
+-
+ #if defined(linux) || defined(__uClinux__)
+ 
+ static const char *dev_fuse_msg =
+@@ -3588,6 +3578,9 @@ static void setup_logging(char *parsed_options)
+ 	ctx->seccache = (struct PERMISSIONS_CACHE*)NULL;
+ 
+ 	ntfs_log_info("Version %s %s %d\n", VERSION, FUSE_TYPE, fuse_version());
++	if (strcmp(opts.arg_device,opts.device))
++		ntfs_log_info("Requested device %s canonicalized as %s\n",
++				opts.arg_device,opts.device);
+ 	ntfs_log_info("Mounted %s (%s, label \"%s\", NTFS %d.%d)\n",
+ 			opts.device, (ctx->ro) ? "Read-Only" : "Read-Write",
+ 			ctx->vol->vol_name, ctx->vol->major_ver,
+diff --git a/src/ntfs-3g_common.c b/src/ntfs-3g_common.c
+index 1ec24e0..b246b9c 100644
+--- a/src/ntfs-3g_common.c
++++ b/src/ntfs-3g_common.c
+@@ -47,6 +47,7 @@
+ #include "security.h"
+ #include "xattrs.h"
+ #include "ntfs-3g_common.h"
++#include "realpath.h"
+ #include "misc.h"
+ 
+ const char xattr_ntfs_3g[] = "ntfs-3g.";
+@@ -509,7 +510,9 @@ int ntfs_parse_options(struct ntfs_options *popts, void (*usage)(void),
+ 					return -1;
+ 				
+ 				/* Canonicalize device name (mtab, etc) */
+-				if (!realpath(optarg, popts->device)) {
++				popts->arg_device = optarg;
++				if (!ntfs_realpath_canonicalize(optarg,
++						popts->device)) {
+ 					ntfs_log_perror("%s: Failed to access "
+ 					     "volume '%s'", EXEC_NAME, optarg);
+ 					free(popts->device);
+diff --git a/src/ntfs-3g_common.h b/src/ntfs-3g_common.h
+index 383dbe0..978569d 100644
+--- a/src/ntfs-3g_common.h
++++ b/src/ntfs-3g_common.h
+@@ -29,6 +29,7 @@ struct ntfs_options {
+         char    *mnt_point;     /* Mount point */    
+         char    *options;       /* Mount options */  
+         char    *device;        /* Device to mount */
++	char	*arg_device;	/* Device requested in argv */
+ } ;
+ 
+ typedef enum {
+-- 
+1.7.4.1
+
