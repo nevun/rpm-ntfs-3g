@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2011.4.12
-Release:	4%{?dist}
+Release:	5%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -118,7 +118,7 @@ ln -s mount.ntfs-3g mount.ntfs-fuse
 # mount...
 ln -s mount.ntfs-3g mount.ntfs
 # Need this for fsck to find it
-ln -s ../ntfsck fsck.ntfs
+ln -s ../bin/ntfsck fsck.ntfs
 popd
 
 # Compat symlinks
@@ -195,6 +195,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Mon Sep 12 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-5
+- fix ntfsck symlink (thanks to Chris Smart for catching it)
+
 * Wed Sep  7 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-4
 - fix issue preventing some volume types from not working properly (bz735862)
 - create fsck.ntfs symlink to ntfsck (bz735612).
