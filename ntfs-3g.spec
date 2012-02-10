@@ -3,12 +3,12 @@
 %define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
 # For release candidates
-%global subver -RC
+# %%global subver -RC
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2011.10.9
-Release:	3%{?dist}
+Version:	2012.1.15
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -168,6 +168,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Fri Feb 10 2012 Tom Callaway <spot@fedoraproject.org> 2:2012.1.15-1
+- update to 2012.1.15
+
 * Wed Feb  1 2012 Kay Sievers <kay@redhat.com> 2:2011.10.9-3
 - install everything in /usr
   https://fedoraproject.org/wiki/Features/UsrMove
