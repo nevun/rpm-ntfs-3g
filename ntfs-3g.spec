@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2012.1.15
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -27,6 +27,9 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		ntfs-3g-junction-point-fix.patch
+# Windows 8 safety checks
+Patch2:		ntfs-3g-4d0b9163c9ef1f0cdbbf533317b291220c7fd1c7.patch
+Patch3:		ntfs-3g-559270a8f67c77a7ce51246c23d2b2837bcff0c9.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -69,6 +72,8 @@ included utilities see man 8 ntfsprogs after installation).
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
 %patch1 -p1 -b .junction-fix
+%patch2 -p1 -b .4d0b9163
+%patch3 -p1 -b .559270a8
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -170,6 +175,12 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Thu Oct  4 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-4
+- add patches from upstream git to add a level of safety in the case where windows 8
+  leaves the NTFS filesystem in an unsafe state and Linux access could result in data loss.
+  Basically, with these patches, Linux will refuse to mount the ntfs partition. For the details
+  refer to: https://bugzilla.redhat.com/show_bug.cgi?id=859373
+
 * Sun Aug 19 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-3
 - apply upstream fix for junction points (bz849332)
 
