@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2012.1.15
-Release:	4%{?dist}
+Release:	5%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -48,7 +48,9 @@ Group:		Development/Libraries
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
-Obsoletes:	ntfsprogs-devel < %{epoch}:%{version}-%{release}
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# standalone package.
+Obsoletes:	ntfsprogs-devel < 2.0.0-17
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g
@@ -61,7 +63,9 @@ Group:		System Environment/Base
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
 # Needed to fix multilib issue
-Obsoletes:	ntfsprogs < %{epoch}:%{version}-%{release}
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# standalone package.
+Obsoletes:	ntfsprogs < 2.0.0-17
 
 %description -n ntfsprogs
 The ntfsprogs package currently consists of a library and utilities such as 
@@ -175,6 +179,11 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Mon Oct 15 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-5
+- Limit obsoletes to last ntfsprogs-* versions ( < 2.0.0-17 ) to
+  minimize yum churn (where it would obsolete itself on every upgrade)
+  BZ#863641
+
 * Thu Oct  4 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-4
 - add patches from upstream git to add a level of safety in the case where windows 8
   leaves the NTFS filesystem in an unsafe state and Linux access could result in data loss.
