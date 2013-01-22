@@ -7,8 +7,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2012.1.15
-Release:	5%{?dist}
+Version:	2013.1.13
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -179,6 +179,13 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
+* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1
+- New upstream version 2013.1.13 (RHBZ#902729).
+- Drop ntfs-3g-junction-point-fix.patch (now upstream).
+- Drop Windows 8 patches x 2 (both now upstream).
+- Remove obsolete patches from Fedora git repository.
+- Fix .gitignore file.
+
 * Mon Oct 15 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-5
 - Limit obsoletes to last ntfsprogs-* versions ( < 2.0.0-17 ) to
   minimize yum churn (where it would obsolete itself on every upgrade)
