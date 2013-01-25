@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2013.1.13
-Release:	1%{?dist}
+Release:	1%{?dist}.1
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -26,10 +26,6 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
-Patch1:		ntfs-3g-junction-point-fix.patch
-# Windows 8 safety checks
-Patch2:		ntfs-3g-4d0b9163c9ef1f0cdbbf533317b291220c7fd1c7.patch
-Patch3:		ntfs-3g-559270a8f67c77a7ce51246c23d2b2837bcff0c9.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -75,9 +71,6 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
-%patch1 -p1 -b .junction-fix
-%patch2 -p1 -b .4d0b9163
-%patch3 -p1 -b .559270a8
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -179,7 +172,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
-* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1
+* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1.fc18.1
 - New upstream version 2013.1.13 (RHBZ#902729).
 - Drop ntfs-3g-junction-point-fix.patch (now upstream).
 - Drop Windows 8 patches x 2 (both now upstream).
