@@ -8,11 +8,10 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2013.1.13
-Release:	1%{?dist}.1
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
-Source1:	20-ntfs-config-write-policy.fdi
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -112,9 +111,6 @@ rmdir %{buildroot}/sbin
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
-mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
@@ -136,7 +132,6 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
-%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
 
 %files devel
 %{_includedir}/ntfs-3g/
@@ -172,7 +167,10 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 
 %changelog
-* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1.fc18.1
+* Thu Jan 31 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-2
+- drop hal files, since hal is very dead
+
+* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1
 - New upstream version 2013.1.13 (RHBZ#902729).
 - Drop ntfs-3g-junction-point-fix.patch (now upstream).
 - Drop Windows 8 patches x 2 (both now upstream).
