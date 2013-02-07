@@ -165,8 +165,12 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %{_mandir}/man8/mkntfs.8*
 %{_mandir}/man8/mkfs.ntfs.8*
 %{_mandir}/man8/ntfs[^m][^o]*.8*
+%exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Thu Feb  7 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-3
+- drop redundant manpages from ntfsprogs subpackage
+
 * Thu Jan 31 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-2
 - drop hal files, since hal is very dead
 
