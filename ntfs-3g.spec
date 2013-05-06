@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2013.1.13
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -25,6 +25,10 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=951603
+Patch1:		ntfsck.c.4Ksectors.patch
+# https://bugzilla.redhat.com/show_bug.cgi?id=958681
+Patch2:		ntfs-3g-truncated-check.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -70,6 +74,8 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
+%patch1 -p0 -b .4k
+%patch2 -p0 -b .truncated
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -168,6 +174,10 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Mon May  6 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-4
+- apply fixes from upstream for issue with 4K sector drives (bz951603) 
+  and truncated check for Interix types on a 32-bit CPU (bz958681)
+
 * Thu Feb  7 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-3
 - drop redundant manpages from ntfsprogs subpackage
 
