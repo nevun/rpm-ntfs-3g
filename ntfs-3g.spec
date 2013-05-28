@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2013.1.13
-Release:	4%{?dist}
+Release:	5%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -29,6 +29,8 @@ Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		ntfsck.c.4Ksectors.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=958681
 Patch2:		ntfs-3g-truncated-check.patch
+# http://tuxera.com/forum/viewtopic.php?p=37574#p37574
+Patch3:		compress-lastblock-v2.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -76,6 +78,7 @@ included utilities see man 8 ntfsprogs after installation).
 %patch0 -p1 -b .unsupported
 %patch1 -p0 -b .4k
 %patch2 -p0 -b .truncated
+%patch3 -p0 -b .compressfix
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -174,6 +177,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue May 28 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-5
+- fix bug preventing reads on compressed files on windows 8 partitions (bz967301)
+
 * Mon May  6 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-4
 - apply fixes from upstream for issue with 4K sector drives (bz951603) 
   and truncated check for Interix types on a 32-bit CPU (bz958681)
