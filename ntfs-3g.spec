@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2014.2.15
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -168,6 +168,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Thu Apr 24 2014 Tomáš Mráz <tmraz@redhat.com> - 2:2014.2.15-2
+- Rebuild for new libgcrypt
+
 * Wed Feb 26 2014 Tom Callaway <spot@fedoraproject.org> 2:2014.2.15-1
 - update to 2014.2.15
 
