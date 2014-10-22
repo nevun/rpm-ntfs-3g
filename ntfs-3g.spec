@@ -7,12 +7,11 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2011.4.12
-Release:	5%{?dist}
+Version:	2014.2.15
+Release:	6%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
-Source1:	20-ntfs-config-write-policy.fdi
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -25,16 +24,19 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
-Patch0:		ntfs-3g-2011.4.12-ntfsprogs-header-fix.patch
-Patch1:		ntfs-3g_ntfsprogs-2011.4.12-enable-extras-option-full.patch
-# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=commit;h=571dbc5784af042c94ed0f025c4d2d842c591d1f
-# https://bugzilla.redhat.com/show_bug.cgi?id=735862
-Patch2:		ntfs-3g_ntfsprogs-571dbc5784af042c94ed0f025c4d2d842c591d1f.patch
-# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsck.c;h=0964a4de57a385308f9b5bf61b04b25812e17b7f;hp=ff6946dfe286a87e0dafd4c6a509a8b7bc69625e;hb=HEAD;hpb=0289d1a6c31942609b96fdf2c1baeb7355fee2bc
-Patch3:		ntfsprogs-ntfsck-cleanups-from-git.patch
-# http://ntfs-3g.git.sourceforge.net/git/gitweb.cgi?p=ntfs-3g/ntfs-3g_ntfsprogs;a=blobdiff;f=ntfsprogs/ntfsfix.c;h=9b3d5eeb368ff85fa6ef3c18b44c2dcc2ba5ea07;hp=97a14a59b6318c0f2baa1c7a111bde3254e42d5a;hb=HEAD;hpb=44116675cad2055b326a9ac797c5105d78896475
-# bz 711662, 723562
-Patch4:		ntfsprogs-ntfsfix-cleanups-from-git.patch
+Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+
+# Upstream patches which add fstrim support.
+# ae9aeebbbf1523f3e37221b1172cf05775ef8ec9
+Patch1:         0001-Upgraded-fuse-lite-to-support-ioctls.patch
+# f4e3f126df0a577903ec043dbcbe38e2863ce3d6
+Patch2:         0002-Implemented-fstrim-8.patch
+# c26a519da1ed182e7cfd67e7a353932dda53d811
+Patch3:         0001-Fixed-fstrim-8-applied-to-partitions.patch
+# Patch2 requires that libntfs-3g/Makefile is regenerated.  This can
+# be removed, as well as the call to autoreconf below, when we move to
+# a released version of ntfs-3g that includes the new feature.
+BuildRequires:  autoconf automake libtool
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -53,7 +55,9 @@ Group:		Development/Libraries
 Requires:	%{name} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
-Obsoletes:	ntfsprogs-devel < %{epoch}:%{version}-%{release}
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# standalone package.
+Obsoletes:	ntfsprogs-devel < 2.0.0-17
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g
@@ -66,7 +70,9 @@ Group:		System Environment/Base
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
 # Needed to fix multilib issue
-Obsoletes:	ntfsprogs < %{epoch}:%{version}-%{release}
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# standalone package.
+Obsoletes:	ntfsprogs < 2.0.0-17
 
 %description -n ntfsprogs
 The ntfsprogs package currently consists of a library and utilities such as 
@@ -75,12 +81,11 @@ included utilities see man 8 ntfsprogs after installation).
 
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
-%patch0 -p1 -b .header-fix
-%patch1 -p1 -b .enable-extras
-%patch2 -p1 -b .735862
-%patch3 -p1 -b .fsckfixes
-%patch4 -p1 -b .ntfsfixfixes
-autoreconf -if
+%patch0 -p1 -b .unsupported
+%patch1 -p1 -b .ioctl
+%patch2 -p1 -b .fstrim
+%patch3 -p1 -b .parts
+autoreconf -i
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -91,28 +96,24 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--with-fuse=external \
 %endif
 	--exec-prefix=/ \
-	--bindir=/bin \
-	--sbindir=/sbin \
 	--enable-crypto \
-	--enable-extras \
-	--libdir=/%{_lib}
+	--enable-extras 
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 
 %install
 make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
-rm -rf %{buildroot}/%{_lib}/*.la
-rm -rf %{buildroot}/%{_lib}/*.a
+rm -rf %{buildroot}%{_libdir}/*.la
+rm -rf %{buildroot}%{_libdir}/*.a
 
-# make the symlink an actual copy to avoid confusion
-rm -rf %{buildroot}/sbin/mount.ntfs-3g
-cp -a %{buildroot}/bin/ntfs-3g %{buildroot}/sbin/mount.ntfs-3g
+rm -rf %{buildroot}/%{_sbindir}/mount.ntfs-3g
+cp -a %{buildroot}/%{_bindir}/ntfs-3g %{buildroot}/%{_sbindir}/mount.ntfs-3g
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
-pushd %{buildroot}/bin
+pushd %{buildroot}/%{_bindir}
 ln -s ntfs-3g ntfsmount
 popd
-pushd %{buildroot}/sbin
+pushd %{buildroot}/%{_sbindir}
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
@@ -120,81 +121,142 @@ ln -s mount.ntfs-3g mount.ntfs
 # Need this for fsck to find it
 ln -s ../bin/ntfsck fsck.ntfs
 popd
-
-# Compat symlinks
-mkdir -p %{buildroot}%{_bindir}
-pushd %{buildroot}%{_bindir}
-ln -s /bin/ntfs-3g ntfs-3g
-ln -s /bin/ntfsmount ntfsmount
-popd
-
-# Put the .pc file in the right place.
-mkdir -p %{buildroot}%{_libdir}/pkgconfig/
-mv %{buildroot}/%{_lib}/pkgconfig/libntfs-3g.pc %{buildroot}%{_libdir}/pkgconfig/
+mv %{buildroot}/sbin/* %{buildroot}/%{_sbindir}
+rmdir %{buildroot}/sbin
 
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
-
-mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 %files
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
-/sbin/mount.ntfs
-%attr(754,root,root) /sbin/mount.ntfs-3g
-/sbin/mount.ntfs-fuse
-/sbin/mount.lowntfs-3g
-/bin/ntfs-3g
-/bin/ntfsmount
-/bin/ntfs-3g.probe
-/bin/ntfs-3g.secaudit
-/bin/ntfs-3g.usermap
-/bin/lowntfs-3g
+%{_sbindir}/mount.ntfs
+%attr(754,root,root) %{_sbindir}/mount.ntfs-3g
+%{_sbindir}/mount.ntfs-fuse
+%{_sbindir}/mount.lowntfs-3g
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
-/%{_lib}/libntfs-3g.so.*
+%{_bindir}/ntfs-3g.probe
+%{_bindir}/ntfs-3g.secaudit
+%{_bindir}/ntfs-3g.usermap
+%{_bindir}/lowntfs-3g
+%{_bindir}/ntfs-3g
+%{_bindir}/ntfsmount
+%{_libdir}/libntfs-3g.so.*
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
-%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
 
 %files devel
 %{_includedir}/ntfs-3g/
-/%{_lib}/libntfs-3g.so
+%{_libdir}/libntfs-3g.so
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %files -n ntfsprogs
 %doc AUTHORS COPYING CREDITS ChangeLog NEWS README
-/bin/ntfscat
-/bin/ntfscluster
-/bin/ntfscmp
-/bin/ntfsfix
-/bin/ntfsinfo
-/bin/ntfsls
+%{_bindir}/ntfscat
+%{_bindir}/ntfscluster
+%{_bindir}/ntfscmp
+%{_bindir}/ntfsfix
+%{_bindir}/ntfsinfo
+%{_bindir}/ntfsls
 # Extras
-/bin/ntfsck
-/bin/ntfsdecrypt
-/bin/ntfsdump_logfile
-/bin/ntfsmftalloc
-/bin/ntfsmove
-/bin/ntfstruncate
-/bin/ntfswipe
-/sbin/fsck.ntfs
-/sbin/mkfs.ntfs
-/sbin/mkntfs
-/sbin/ntfsclone
-/sbin/ntfscp
-/sbin/ntfslabel
-/sbin/ntfsresize
-/sbin/ntfsundelete
+%{_bindir}/ntfsck
+%{_bindir}/ntfsdecrypt
+%{_bindir}/ntfsdump_logfile
+%{_bindir}/ntfsmftalloc
+%{_bindir}/ntfsmove
+%{_bindir}/ntfstruncate
+%{_bindir}/ntfswipe
+%{_sbindir}/fsck.ntfs
+%{_sbindir}/mkfs.ntfs
+%{_sbindir}/mkntfs
+%{_sbindir}/ntfsclone
+%{_sbindir}/ntfscp
+%{_sbindir}/ntfslabel
+%{_sbindir}/ntfsresize
+%{_sbindir}/ntfsundelete
 %{_mandir}/man8/mkntfs.8*
 %{_mandir}/man8/mkfs.ntfs.8*
 %{_mandir}/man8/ntfs[^m][^o]*.8*
+%exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Tue Aug  5 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-5
+- Add upstream patch to fix fstrim so it works on partitions as well
+  as whole disks.
+
+* Thu Jul 31 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-4
+- Upstream patches which add fstrim support.
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Thu Apr 24 2014 Tomáš Mráz <tmraz@redhat.com> - 2:2014.2.15-2
+- Rebuild for new libgcrypt
+
+* Wed Feb 26 2014 Tom Callaway <spot@fedoraproject.org> 2:2014.2.15-1
+- update to 2014.2.15
+
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2013.1.13-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Tue May 28 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-5
+- fix bug preventing reads on compressed files on windows 8 partitions (bz967301)
+
+* Mon May  6 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-4
+- apply fixes from upstream for issue with 4K sector drives (bz951603) 
+  and truncated check for Interix types on a 32-bit CPU (bz958681)
+
+* Thu Feb  7 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-3
+- drop redundant manpages from ntfsprogs subpackage
+
+* Thu Jan 31 2013 Tom Callaway <spot@fedoraproject.org> - 2:2013.1.13-2
+- drop hal files, since hal is very dead
+
+* Tue Jan 22 2013 Richard W.M. Jones <rjones@redhat.com> - 2:2013.1.13-1
+- New upstream version 2013.1.13 (RHBZ#902729).
+- Drop ntfs-3g-junction-point-fix.patch (now upstream).
+- Drop Windows 8 patches x 2 (both now upstream).
+- Remove obsolete patches from Fedora git repository.
+- Fix .gitignore file.
+
+* Mon Oct 15 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-5
+- Limit obsoletes to last ntfsprogs-* versions ( < 2.0.0-17 ) to
+  minimize yum churn (where it would obsolete itself on every upgrade)
+  BZ#863641
+
+* Thu Oct  4 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-4
+- add patches from upstream git to add a level of safety in the case where windows 8
+  leaves the NTFS filesystem in an unsafe state and Linux access could result in data loss.
+  Basically, with these patches, Linux will refuse to mount the ntfs partition. For the details
+  refer to: https://bugzilla.redhat.com/show_bug.cgi?id=859373
+
+* Sun Aug 19 2012 Tom Callaway <spot@fedoraproject.org> - 2:2012.1.15-3
+- apply upstream fix for junction points (bz849332)
+
+* Fri Jul 20 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2012.1.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
+
+* Fri Feb 10 2012 Tom Callaway <spot@fedoraproject.org> 2:2012.1.15-1
+- update to 2012.1.15
+
+* Wed Feb  1 2012 Kay Sievers <kay@redhat.com> 2:2011.10.9-3
+- install everything in /usr
+  https://fedoraproject.org/wiki/Features/UsrMove
+
+* Fri Jan 13 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2011.10.9-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_17_Mass_Rebuild
+
+* Tue Oct 11 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.10.9-1
+- 2011.10.9-RC
+- patch ntfsck to return 0 instead of 1 on unsupported filesystem cases
+
 * Mon Sep 12 2011 Tom Callaway <spot@fedoraproject.org> - 2:2011.4.12-5
 - fix ntfsck symlink (thanks to Chris Smart for catching it)
 
