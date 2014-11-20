@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2014.2.15
-Release:	7%{?dist}
+Release:	8%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -48,6 +48,9 @@ Patch3:         0001-Fixed-fstrim-8-applied-to-partitions.patch
 # be removed, as well as the call to autoreconf below, when we move to
 # a released version of ntfs-3g that includes the new feature.
 BuildRequires:  autoconf automake libtool
+
+# Fixes fuse on old kernels (RHEL 6 or older)
+Patch4:		fuse-fallback.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -96,6 +99,7 @@ included utilities see man 8 ntfsprogs after installation).
 %patch1 -p1 -b .ioctl
 %patch2 -p1 -b .fstrim
 %patch3 -p1 -b .parts
+%patch4 -p0 -b .oldkernel
 autoreconf -i
 
 %build
@@ -290,6 +294,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Nov 19 2014 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-8
+- apply upstream patch to properly use fuse on older kernels
+
 * Mon Nov 17 2014 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
 - old rhel (< 7) needs old pathing and hal file. CONDITIONALIZE ALL THE THINGS!
 
