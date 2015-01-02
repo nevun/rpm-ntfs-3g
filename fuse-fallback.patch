@@ -1,0 +1,49 @@
+--- include/fuse-lite/fuse_kernel.h.ref	2014-11-01 17:35:14.000000000 +0100
++++ include/fuse-lite/fuse_kernel.h	2014-11-01 21:27:07.000000000 +0100
+@@ -56,11 +56,12 @@
+ #define FUSE_KERNEL_MINOR_VERSION 18
+ 
+ /*
+- * For binary compatibility with old kernels we accept falling back to 7.8
++ * For binary compatibility with old kernels we accept falling back
++ * to 7.12 or earlier maximum version supported by the kernel
+  */
+ 
+ #define FUSE_KERNEL_MAJOR_FALLBACK 7
+-#define FUSE_KERNEL_MINOR_FALLBACK 8
++#define FUSE_KERNEL_MINOR_FALLBACK 12
+ 
+ /** The node ID of the root inode */
+ #define FUSE_ROOT_ID 1
+--- libfuse-lite/fuse_lowlevel.c.ref	2014-11-01 17:35:14.000000000 +0100
++++ libfuse-lite/fuse_lowlevel.c	2014-11-02 08:18:17.000000000 +0100
+@@ -1105,7 +1105,7 @@
+     outarg.major = FUSE_KERNEL_VERSION;
+ 	/*
+ 	 * Suggest using protocol 7.18 when available, and fallback
+-	 * to 7.8 when running on an old kernel.
++	 * to 7.12 or even earlier when running on an old kernel.
+ 	 * Protocol 7.12 has the ability to process the umask
+ 	 * conditionnally (as needed if POSIXACLS is set)
+ 	 * Protocol 7.18 has the ability to process the ioctls
+@@ -1119,8 +1119,20 @@
+ 		outarg.flags |= FUSE_DONT_MASK;
+ #endif
+     } else {
++	/* Never use a version more recent than supported by the kernel */
++	if ((arg->major < FUSE_KERNEL_MAJOR_FALLBACK)
++	    || ((arg->major == FUSE_KERNEL_MAJOR_FALLBACK)
++		&& (arg->minor < FUSE_KERNEL_MINOR_FALLBACK))) {
++	    outarg.major = arg->major;
++	    outarg.minor = arg->minor;
++	} else {
+ 	    outarg.major = FUSE_KERNEL_MAJOR_FALLBACK;
+ 	    outarg.minor = FUSE_KERNEL_MINOR_FALLBACK;
++#ifdef POSIXACLS
++	    if (f->conn.want & FUSE_CAP_DONT_MASK)
++		outarg.flags |= FUSE_DONT_MASK;
++#endif
++    	}
+     }
+     if (f->conn.async_read)
+         outarg.flags |= FUSE_ASYNC_READ;
