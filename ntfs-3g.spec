@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2014.2.15
-Release:	6%{?dist}
+Release:	7%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -33,6 +33,9 @@ Patch1:         0001-Upgraded-fuse-lite-to-support-ioctls.patch
 Patch2:         0002-Implemented-fstrim-8.patch
 # c26a519da1ed182e7cfd67e7a353932dda53d811
 Patch3:         0001-Fixed-fstrim-8-applied-to-partitions.patch
+# Upstream offered this patch in bugzilla
+Patch4:		ntfs-3g-ignore-s-option.patch
+
 # Patch2 requires that libntfs-3g/Makefile is regenerated.  This can
 # be removed, as well as the call to autoreconf below, when we move to
 # a released version of ntfs-3g that includes the new feature.
@@ -85,6 +88,7 @@ included utilities see man 8 ntfsprogs after installation).
 %patch1 -p1 -b .ioctl
 %patch2 -p1 -b .fstrim
 %patch3 -p1 -b .parts
+%patch4 -p1 -b .sopt
 autoreconf -i
 
 %build
@@ -184,6 +188,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue Jan 13 2015 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
+- add patch to ignore -s option
+
 * Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
