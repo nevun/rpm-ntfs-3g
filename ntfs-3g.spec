@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2014.2.15
-Release:	4%{?dist}
+Release:	7%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -25,6 +25,21 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+
+# Upstream patches which add fstrim support.
+# ae9aeebbbf1523f3e37221b1172cf05775ef8ec9
+Patch1:         0001-Upgraded-fuse-lite-to-support-ioctls.patch
+# f4e3f126df0a577903ec043dbcbe38e2863ce3d6
+Patch2:         0002-Implemented-fstrim-8.patch
+# c26a519da1ed182e7cfd67e7a353932dda53d811
+Patch3:         0001-Fixed-fstrim-8-applied-to-partitions.patch
+# Upstream offered this patch in bugzilla
+Patch4:		ntfs-3g-ignore-s-option.patch
+
+# Patch2 requires that libntfs-3g/Makefile is regenerated.  This can
+# be removed, as well as the call to autoreconf below, when we move to
+# a released version of ntfs-3g that includes the new feature.
+BuildRequires:  autoconf automake libtool
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -70,6 +85,11 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
+%patch1 -p1 -b .ioctl
+%patch2 -p1 -b .fstrim
+%patch3 -p1 -b .parts
+%patch4 -p1 -b .sopt
+autoreconf -i
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -168,8 +188,18 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
-* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-4
+* Tue Jan 13 2015 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
+- add patch to ignore -s option
+
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Tue Aug  5 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-5
+- Add upstream patch to fix fstrim so it works on partitions as well
+  as whole disks.
+
+* Thu Jul 31 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-4
+- Upstream patches which add fstrim support.
 
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
