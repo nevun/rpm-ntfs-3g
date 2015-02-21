@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2014.2.15
-Release:	7%{?dist}
+Release:	8%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -188,6 +188,10 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 2:2014.2.15-8
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
 * Tue Jan 13 2015 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
 - add patch to ignore -s option
 
