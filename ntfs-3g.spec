@@ -5,13 +5,24 @@
 # For release candidates
 # %%global subver -RC
 
+%global oldrhel 0
+
+%if 0%{?rhel}
+%if 0%{?rhel} < 7
+%global oldrhel 1
+%endif
+%endif
+
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2014.2.15
+Version:	2015.3.14
 Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+%if %{oldrhel}
+Source1:       20-ntfs-config-write-policy.fdi
+%endif
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -80,24 +91,47 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--with-fuse=external \
 %endif
 	--exec-prefix=/ \
+%if %{oldrhel}
+	--bindir=/bin \
+	--sbindir=/sbin \
+	--libdir=/%{_lib} \
+%endif
 	--enable-crypto \
-	--enable-extras 
+	--enable-extras \
+	--enable-quarantined
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 
 %install
 make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
+%if %{oldrhel}
+rm -rf %{buildroot}/%{_lib}/*.la
+rm -rf %{buildroot}/%{_lib}/*.a
+%else
 rm -rf %{buildroot}%{_libdir}/*.la
 rm -rf %{buildroot}%{_libdir}/*.a
+%endif
 
+%if %{oldrhel}
+rm -rf %{buildroot}/sbin/mount.ntfs-3g
+cp -a %{buildroot}/bin/ntfs-3g %{buildroot}/sbin/mount.ntfs-3g
+%else
 rm -rf %{buildroot}/%{_sbindir}/mount.ntfs-3g
 cp -a %{buildroot}/%{_bindir}/ntfs-3g %{buildroot}/%{_sbindir}/mount.ntfs-3g
+%endif
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
+%if %{oldrhel}
+pushd %{buildroot}/bin
+ln -s ntfs-3g ntfsmount
+popd
+pushd %{buildroot}/sbin
+%else
 pushd %{buildroot}/%{_bindir}
 ln -s ntfs-3g ntfsmount
 popd
 pushd %{buildroot}/%{_sbindir}
+%endif
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
@@ -105,51 +139,123 @@ ln -s mount.ntfs-3g mount.ntfs
 # Need this for fsck to find it
 ln -s ../bin/ntfsck fsck.ntfs
 popd
+
+%if %{oldrhel}
+# Compat symlinks
+mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+ln -s /bin/ntfs-3g ntfs-3g
+ln -s /bin/ntfsmount ntfsmount
+popd
+
+# Put the .pc file in the right place.
+mkdir -p %{buildroot}%{_libdir}/pkgconfig/
+mv %{buildroot}/%{_lib}/pkgconfig/libntfs-3g.pc %{buildroot}%{_libdir}/pkgconfig/
+%else
 mv %{buildroot}/sbin/* %{buildroot}/%{_sbindir}
 rmdir %{buildroot}/sbin
+%endif
 
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
+
+%if %{oldrhel}
+mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
+cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
+%endif
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 %files
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
+%if %{oldrhel}
+/sbin/mount.ntfs
+/sbin/mount.ntfs-3g
+/sbin/mount.ntfs-fuse
+/sbin/mount.lowntfs-3g
+/bin/ntfs-3g
+/bin/ntfsmount
+%else
 %{_sbindir}/mount.ntfs
-%attr(754,root,root) %{_sbindir}/mount.ntfs-3g
+%{_sbindir}/mount.ntfs-3g
 %{_sbindir}/mount.ntfs-fuse
 %{_sbindir}/mount.lowntfs-3g
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
+%endif
+%if %{oldrhel}
+/bin/ntfs-3g.probe
+/bin/ntfs-3g.secaudit
+/bin/ntfs-3g.usermap
+/bin/lowntfs-3g
+%else
 %{_bindir}/ntfs-3g.probe
 %{_bindir}/ntfs-3g.secaudit
 %{_bindir}/ntfs-3g.usermap
 %{_bindir}/lowntfs-3g
-%{_bindir}/ntfs-3g
-%{_bindir}/ntfsmount
+%endif
+%if %{oldrhel}
+/%{_lib}/libntfs-3g.so.*
+%else
 %{_libdir}/libntfs-3g.so.*
+%endif
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
+%if %{oldrhel}
+%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
+%endif
 
 %files devel
 %{_includedir}/ntfs-3g/
+%if %{oldrhel}
+/%{_lib}/libntfs-3g.so
+%else
 %{_libdir}/libntfs-3g.so
+%endif
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %files -n ntfsprogs
 %doc AUTHORS COPYING CREDITS ChangeLog NEWS README
+%if %{oldrhel}
+/bin/ntfscat
+/bin/ntfscluster
+/bin/ntfscmp
+/bin/ntfsfix
+/bin/ntfsinfo
+/bin/ntfsls
+%else
 %{_bindir}/ntfscat
 %{_bindir}/ntfscluster
 %{_bindir}/ntfscmp
 %{_bindir}/ntfsfix
 %{_bindir}/ntfsinfo
 %{_bindir}/ntfsls
+%endif
 # Extras
+%if %{oldrhel}
+/bin/ntfsck
+/bin/ntfsdecrypt
+/bin/ntfsdump_logfile
+/bin/ntfsfallocate
+/bin/ntfsmftalloc
+/bin/ntfsmove
+/bin/ntfstruncate
+/bin/ntfswipe
+/sbin/fsck.ntfs
+/sbin/mkfs.ntfs
+/sbin/mkntfs
+/sbin/ntfsclone
+/sbin/ntfscp
+/sbin/ntfslabel
+/sbin/ntfsresize
+/sbin/ntfsundelete
+%else
 %{_bindir}/ntfsck
 %{_bindir}/ntfsdecrypt
 %{_bindir}/ntfsdump_logfile
+%{_bindir}/ntfsfallocate
 %{_bindir}/ntfsmftalloc
 %{_bindir}/ntfsmove
 %{_bindir}/ntfstruncate
@@ -162,12 +268,39 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %{_sbindir}/ntfslabel
 %{_sbindir}/ntfsresize
 %{_sbindir}/ntfsundelete
+%endif
 %{_mandir}/man8/mkntfs.8*
 %{_mandir}/man8/mkfs.ntfs.8*
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue Apr  7 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-1
+- update to 2015.3.14
+
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 2:2014.2.15-8
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
+* Tue Jan 13 2015 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
+- add patch to ignore -s option
+
+* Sun Aug 17 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Tue Aug  5 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-5
+- Add upstream patch to fix fstrim so it works on partitions as well
+  as whole disks.
+
+* Thu Jul 31 2014 Richard W.M. Jones <rjones@redhat.com> - 2:2014.2.15-4
+- Upstream patches which add fstrim support.
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2014.2.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Thu Apr 24 2014 Tomáš Mráz <tmraz@redhat.com> - 2:2014.2.15-2
+- Rebuild for new libgcrypt
+
 * Wed Feb 26 2014 Tom Callaway <spot@fedoraproject.org> 2:2014.2.15-1
 - update to 2014.2.15
 
