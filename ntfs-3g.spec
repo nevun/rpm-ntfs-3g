@@ -5,13 +5,24 @@
 # For release candidates
 # %%global subver -RC
 
+%global oldrhel 0
+
+%if 0%{?rhel}
+%if 0%{?rhel} < 7
+%global oldrhel 1
+%endif
+%endif
+
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2014.2.15
-Release:	7%{?dist}
+Version:	2015.3.14
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+%if %{oldrhel}
+Source1:       20-ntfs-config-write-policy.fdi
+%endif
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -25,21 +36,6 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
-
-# Upstream patches which add fstrim support.
-# ae9aeebbbf1523f3e37221b1172cf05775ef8ec9
-Patch1:         0001-Upgraded-fuse-lite-to-support-ioctls.patch
-# f4e3f126df0a577903ec043dbcbe38e2863ce3d6
-Patch2:         0002-Implemented-fstrim-8.patch
-# c26a519da1ed182e7cfd67e7a353932dda53d811
-Patch3:         0001-Fixed-fstrim-8-applied-to-partitions.patch
-# Upstream offered this patch in bugzilla
-Patch4:		ntfs-3g-ignore-s-option.patch
-
-# Patch2 requires that libntfs-3g/Makefile is regenerated.  This can
-# be removed, as well as the call to autoreconf below, when we move to
-# a released version of ntfs-3g that includes the new feature.
-BuildRequires:  autoconf automake libtool
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -85,11 +81,6 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
-%patch1 -p1 -b .ioctl
-%patch2 -p1 -b .fstrim
-%patch3 -p1 -b .parts
-%patch4 -p1 -b .sopt
-autoreconf -i
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -100,24 +91,47 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--with-fuse=external \
 %endif
 	--exec-prefix=/ \
+%if %{oldrhel}
+	--bindir=/bin \
+	--sbindir=/sbin \
+	--libdir=/%{_lib} \
+%endif
 	--enable-crypto \
-	--enable-extras 
+	--enable-extras \
+	--enable-quarantined
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 
 %install
 make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
+%if %{oldrhel}
+rm -rf %{buildroot}/%{_lib}/*.la
+rm -rf %{buildroot}/%{_lib}/*.a
+%else
 rm -rf %{buildroot}%{_libdir}/*.la
 rm -rf %{buildroot}%{_libdir}/*.a
+%endif
 
+%if %{oldrhel}
+rm -rf %{buildroot}/sbin/mount.ntfs-3g
+cp -a %{buildroot}/bin/ntfs-3g %{buildroot}/sbin/mount.ntfs-3g
+%else
 rm -rf %{buildroot}/%{_sbindir}/mount.ntfs-3g
 cp -a %{buildroot}/%{_bindir}/ntfs-3g %{buildroot}/%{_sbindir}/mount.ntfs-3g
+%endif
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
+%if %{oldrhel}
+pushd %{buildroot}/bin
+ln -s ntfs-3g ntfsmount
+popd
+pushd %{buildroot}/sbin
+%else
 pushd %{buildroot}/%{_bindir}
 ln -s ntfs-3g ntfsmount
 popd
 pushd %{buildroot}/%{_sbindir}
+%endif
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
@@ -125,51 +139,123 @@ ln -s mount.ntfs-3g mount.ntfs
 # Need this for fsck to find it
 ln -s ../bin/ntfsck fsck.ntfs
 popd
+
+%if %{oldrhel}
+# Compat symlinks
+mkdir -p %{buildroot}%{_bindir}
+pushd %{buildroot}%{_bindir}
+ln -s /bin/ntfs-3g ntfs-3g
+ln -s /bin/ntfsmount ntfsmount
+popd
+
+# Put the .pc file in the right place.
+mkdir -p %{buildroot}%{_libdir}/pkgconfig/
+mv %{buildroot}/%{_lib}/pkgconfig/libntfs-3g.pc %{buildroot}%{_libdir}/pkgconfig/
+%else
 mv %{buildroot}/sbin/* %{buildroot}/%{_sbindir}
 rmdir %{buildroot}/sbin
+%endif
 
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
+
+%if %{oldrhel}
+mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
+cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
+%endif
 
 %post -p /sbin/ldconfig
 %postun -p /sbin/ldconfig
 
 %files
 %doc AUTHORS ChangeLog COPYING CREDITS NEWS README
+%if %{oldrhel}
+/sbin/mount.ntfs
+/sbin/mount.ntfs-3g
+/sbin/mount.ntfs-fuse
+/sbin/mount.lowntfs-3g
+/bin/ntfs-3g
+/bin/ntfsmount
+%else
 %{_sbindir}/mount.ntfs
-%attr(754,root,root) %{_sbindir}/mount.ntfs-3g
+%{_sbindir}/mount.ntfs-3g
 %{_sbindir}/mount.ntfs-fuse
 %{_sbindir}/mount.lowntfs-3g
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
+%endif
+%if %{oldrhel}
+/bin/ntfs-3g.probe
+/bin/ntfs-3g.secaudit
+/bin/ntfs-3g.usermap
+/bin/lowntfs-3g
+%else
 %{_bindir}/ntfs-3g.probe
 %{_bindir}/ntfs-3g.secaudit
 %{_bindir}/ntfs-3g.usermap
 %{_bindir}/lowntfs-3g
-%{_bindir}/ntfs-3g
-%{_bindir}/ntfsmount
+%endif
+%if %{oldrhel}
+/%{_lib}/libntfs-3g.so.*
+%else
 %{_libdir}/libntfs-3g.so.*
+%endif
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
+%if %{oldrhel}
+%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
+%endif
 
 %files devel
 %{_includedir}/ntfs-3g/
+%if %{oldrhel}
+/%{_lib}/libntfs-3g.so
+%else
 %{_libdir}/libntfs-3g.so
+%endif
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %files -n ntfsprogs
 %doc AUTHORS COPYING CREDITS ChangeLog NEWS README
+%if %{oldrhel}
+/bin/ntfscat
+/bin/ntfscluster
+/bin/ntfscmp
+/bin/ntfsfix
+/bin/ntfsinfo
+/bin/ntfsls
+%else
 %{_bindir}/ntfscat
 %{_bindir}/ntfscluster
 %{_bindir}/ntfscmp
 %{_bindir}/ntfsfix
 %{_bindir}/ntfsinfo
 %{_bindir}/ntfsls
+%endif
 # Extras
+%if %{oldrhel}
+/bin/ntfsck
+/bin/ntfsdecrypt
+/bin/ntfsdump_logfile
+/bin/ntfsfallocate
+/bin/ntfsmftalloc
+/bin/ntfsmove
+/bin/ntfstruncate
+/bin/ntfswipe
+/sbin/fsck.ntfs
+/sbin/mkfs.ntfs
+/sbin/mkntfs
+/sbin/ntfsclone
+/sbin/ntfscp
+/sbin/ntfslabel
+/sbin/ntfsresize
+/sbin/ntfsundelete
+%else
 %{_bindir}/ntfsck
 %{_bindir}/ntfsdecrypt
 %{_bindir}/ntfsdump_logfile
+%{_bindir}/ntfsfallocate
 %{_bindir}/ntfsmftalloc
 %{_bindir}/ntfsmove
 %{_bindir}/ntfstruncate
@@ -182,12 +268,20 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %{_sbindir}/ntfslabel
 %{_sbindir}/ntfsresize
 %{_sbindir}/ntfsundelete
+%endif
 %{_mandir}/man8/mkntfs.8*
 %{_mandir}/man8/mkfs.ntfs.8*
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue Apr  7 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-1
+- update to 2015.3.14
+
+* Sat Feb 21 2015 Till Maas <opensource@till.name> - 2:2014.2.15-8
+- Rebuilt for Fedora 23 Change
+  https://fedoraproject.org/wiki/Changes/Harden_all_packages_with_position-independent_code
+
 * Tue Jan 13 2015 Tom Callaway <spot@fedoraproject.org> - 2:2014.2.15-7
 - add patch to ignore -s option
 
