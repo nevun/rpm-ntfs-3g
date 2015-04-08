@@ -176,6 +176,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /sbin/mount.lowntfs-3g
 /bin/ntfs-3g
 /bin/ntfsmount
+#compat symlinks
+%{_bindir}/ntfs-3g
+%{_bindir}/ntfsmount
 %else
 %{_sbindir}/mount.ntfs
 %{_sbindir}/mount.ntfs-3g
