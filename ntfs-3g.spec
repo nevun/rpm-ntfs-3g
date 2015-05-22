@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2015.3.14
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -36,6 +36,7 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+Patch1:		CVE-2015-3202.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -81,6 +82,7 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
+%patch1 -p1 -b .CVE-2015-3202
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -176,6 +178,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /sbin/mount.lowntfs-3g
 /bin/ntfs-3g
 /bin/ntfsmount
+#compat symlinks
+%{_bindir}/ntfs-3g
+%{_bindir}/ntfsmount
 %else
 %{_sbindir}/mount.ntfs
 %{_sbindir}/mount.ntfs-3g
@@ -275,6 +280,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Fri May 22 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-2
+- fix CVE-2015-3202
+
 * Tue Apr  7 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-1
 - update to 2015.3.14
 
