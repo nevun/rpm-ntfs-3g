@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2015.3.14
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -280,6 +280,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2015.3.14-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Fri May 22 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-2
 - fix CVE-2015-3202
 
