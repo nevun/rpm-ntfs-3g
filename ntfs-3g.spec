@@ -1,6 +1,6 @@
 # Pass --with externalfuse to compile against system fuse lib
 # Default is internal fuse-lite.
-%define with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
+%global with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
 
 # For release candidates
 # %%global subver -RC
@@ -15,8 +15,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2015.3.14
-Release:	2%{?dist}
+Version:	2016.2.22
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -52,7 +52,7 @@ file access right and ownership support.
 %package devel
 Summary:	Development files and libraries for ntfs-3g
 Group:		Development/Libraries
-Requires:	%{name} = %{epoch}:%{version}-%{release}
+Requires:	%{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
 # ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
@@ -170,7 +170,12 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %postun -p /sbin/ldconfig
 
 %files
-%doc AUTHORS ChangeLog COPYING CREDITS NEWS README
+%doc AUTHORS ChangeLog CREDITS NEWS README
+%if %{oldrhel}
+%doc COPYING
+%else
+%license COPYING
+%endif
 %if %{oldrhel}
 /sbin/mount.ntfs
 /sbin/mount.ntfs-3g
@@ -222,8 +227,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %files -n ntfsprogs
-%doc AUTHORS COPYING CREDITS ChangeLog NEWS README
+%doc AUTHORS CREDITS ChangeLog NEWS README
 %if %{oldrhel}
+%doc COPYING
 /bin/ntfscat
 /bin/ntfscluster
 /bin/ntfscmp
@@ -231,6 +237,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsinfo
 /bin/ntfsls
 %else
+%license COPYING
 %{_bindir}/ntfscat
 %{_bindir}/ntfscluster
 %{_bindir}/ntfscmp
@@ -246,6 +253,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsfallocate
 /bin/ntfsmftalloc
 /bin/ntfsmove
+/bin/ntfsrecover
 /bin/ntfstruncate
 /bin/ntfswipe
 /sbin/fsck.ntfs
@@ -263,6 +271,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_bindir}/ntfsfallocate
 %{_bindir}/ntfsmftalloc
 %{_bindir}/ntfsmove
+%{_bindir}/ntfsrecover
 %{_bindir}/ntfstruncate
 %{_bindir}/ntfswipe
 %{_sbindir}/fsck.ntfs
@@ -280,6 +289,18 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Mar 23 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-1
+- update to 2016.2.22
+
+* Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2:2015.3.14-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Tue Jan 19 2016 Tom Callaway <spot@fedoraproject.org> - 2:2015.3.14-4
+- spec file cleanups
+
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 2:2015.3.14-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Fri May 22 2015 Tom Callaway <spot@fedoraproject.org> 2:2015.3.14-2
 - fix CVE-2015-3202
 
