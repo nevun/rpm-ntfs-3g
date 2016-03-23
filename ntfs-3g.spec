@@ -15,8 +15,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2015.3.14
-Release:	5%{?dist}
+Version:	2016.2.22
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
@@ -82,7 +82,6 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
-%patch1 -p1 -b .CVE-2015-3202
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -253,6 +252,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsfallocate
 /bin/ntfsmftalloc
 /bin/ntfsmove
+/bin/ntfsrecover
 /bin/ntfstruncate
 /bin/ntfswipe
 /sbin/fsck.ntfs
@@ -270,6 +270,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_bindir}/ntfsfallocate
 %{_bindir}/ntfsmftalloc
 %{_bindir}/ntfsmove
+%{_bindir}/ntfsrecover
 %{_bindir}/ntfstruncate
 %{_bindir}/ntfswipe
 %{_sbindir}/fsck.ntfs
@@ -287,6 +288,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Mar 23 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-1
+- update to 2016.2.22
+
 * Thu Feb 04 2016 Fedora Release Engineering <releng@fedoraproject.org> - 2:2015.3.14-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
