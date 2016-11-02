@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2016.2.22
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 # Upstream source includes non-free ntfsprogs/boot.c
@@ -105,6 +105,8 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
 %endif
+	--enable-posix-acls \
+	--enable-xattr-mappings \
 	--enable-crypto \
 	--enable-extras \
 	--enable-quarantined
@@ -296,6 +298,10 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Nov  2 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-3
+- enable posix ACLS
+- enable xattr mappings
+
 * Tue Aug  9 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-2
 - replace non-free ntfsprogs/boot.c with boot-gpl.c (resolves bz1364710)
 
