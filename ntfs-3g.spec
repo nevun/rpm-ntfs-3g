@@ -16,13 +16,19 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2016.2.22
-Release:	1%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+# Upstream source includes non-free ntfsprogs/boot.c
+# GPL replacement file exists as Source2, but we need to delete boot.c from the tarball
+# Unpack it, rm ntfsprogs/boot.c, then repackage it as ntfs3g_ntfsprogs-clean-%{version}%{?subver}.tgz
+# Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+Source0:	%{name}_ntfsprogs-clean-%{version}%{?subver}.tgz
 %if %{oldrhel}
 Source1:       20-ntfs-config-write-policy.fdi
 %endif
+# http://tuxera.com/forum/viewtopic.php?f=2&t=31104
+Source2:	boot-gpl.c
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -82,6 +88,8 @@ included utilities see man 8 ntfsprogs after installation).
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
 
+cp %{SOURCE2} ntfsprogs/boot.c
+
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 %configure \
@@ -96,6 +104,8 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--sbindir=/sbin \
 	--libdir=/%{_lib} \
 %endif
+	--enable-posix-acls \
+	--enable-xattr-mappings \
 	--enable-crypto \
 	--enable-extras \
 	--enable-quarantined
@@ -287,6 +297,13 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Nov  2 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-3
+- enable posix ACLS
+- enable xattr mappings
+
+* Tue Aug  9 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-2
+- replace non-free ntfsprogs/boot.c with boot-gpl.c (resolves bz1364710)
+
 * Wed Mar 23 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-1
 - update to 2016.2.22
 
