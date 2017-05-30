@@ -15,8 +15,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2016.2.22
-Release:	4%{?dist}
+Version:	2017.3.23
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 # Upstream source includes non-free ntfsprogs/boot.c
@@ -43,11 +43,6 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		CVE-2015-3202.patch
-# http://seclists.org/oss-sec/2017/q1/259
-# Fedora doesn't setuid ntfs-3g
-# but since it's possible some users might
-# we will patch it anyways.
-Patch2:		ntfs-3g_ntfsprogs-2016.2.22-CVE-2017-0358.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -93,7 +88,6 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
-%patch2 -p1 -b .CVE20170358
 
 cp %{SOURCE2} ntfsprogs/boot.c
 
@@ -211,13 +205,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %endif
 %if %{oldrhel}
 /bin/ntfs-3g.probe
-/bin/ntfs-3g.secaudit
-/bin/ntfs-3g.usermap
 /bin/lowntfs-3g
 %else
 %{_bindir}/ntfs-3g.probe
-%{_bindir}/ntfs-3g.secaudit
-%{_bindir}/ntfs-3g.usermap
 %{_bindir}/lowntfs-3g
 %endif
 %if %{oldrhel}
@@ -251,6 +241,8 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsfix
 /bin/ntfsinfo
 /bin/ntfsls
+/bin/ntfssecaudit
+/bin/ntfsusermap
 %else
 %license COPYING
 %{_bindir}/ntfscat
@@ -259,6 +251,8 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_bindir}/ntfsfix
 %{_bindir}/ntfsinfo
 %{_bindir}/ntfsls
+%{_bindir}/ntfssecaudit
+%{_bindir}/ntfsusermap
 %endif
 # Extras
 %if %{oldrhel}
@@ -304,6 +298,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue May 30 2017 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-1
+- update to 2017.3.23
+
 * Wed Feb  8 2017 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-4
 - apply patch for CVE-2017-0358
 - NOTE: Fedora does not setuid ntfs-3g, so it should not be vulnerable 
