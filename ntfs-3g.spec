@@ -15,8 +15,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2016.2.22
-Release:	3%{?dist}
+Version:	2017.3.23
+Release:	1%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 # Upstream source includes non-free ntfsprogs/boot.c
@@ -204,13 +204,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %endif
 %if %{oldrhel}
 /bin/ntfs-3g.probe
-/bin/ntfs-3g.secaudit
-/bin/ntfs-3g.usermap
 /bin/lowntfs-3g
 %else
 %{_bindir}/ntfs-3g.probe
-%{_bindir}/ntfs-3g.secaudit
-%{_bindir}/ntfs-3g.usermap
 %{_bindir}/lowntfs-3g
 %endif
 %if %{oldrhel}
@@ -244,6 +240,8 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 /bin/ntfsfix
 /bin/ntfsinfo
 /bin/ntfsls
+/bin/ntfssecaudit
+/bin/ntfsusermap
 %else
 %license COPYING
 %{_bindir}/ntfscat
@@ -252,6 +250,8 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_bindir}/ntfsfix
 %{_bindir}/ntfsinfo
 %{_bindir}/ntfsls
+%{_bindir}/ntfssecaudit
+%{_bindir}/ntfsusermap
 %endif
 # Extras
 %if %{oldrhel}
@@ -297,6 +297,14 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue May 30 2017 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-1
+- update to 2017.3.23
+
+* Wed Feb  8 2017 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-4
+- apply patch for CVE-2017-0358
+- NOTE: Fedora does not setuid ntfs-3g, so it should not be vulnerable 
+  but some users might make this change so we applied the patch anyways
+
 * Wed Nov  2 2016 Tom Callaway <spot@fedoraproject.org> - 2:2016.2.22-3
 - enable posix ACLS
 - enable xattr mappings
