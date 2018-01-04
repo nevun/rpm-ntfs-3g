@@ -16,19 +16,13 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	3%{?dist}
+Release:	4%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
-# Upstream source includes non-free ntfsprogs/boot.c
-# GPL replacement file exists as Source2, but we need to delete boot.c from the tarball
-# Unpack it, rm ntfsprogs/boot.c, then repackage it as ntfs3g_ntfsprogs-clean-%{version}%{?subver}.tgz
-# Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
-Source0:	%{name}_ntfsprogs-clean-%{version}%{?subver}.tgz
+Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
 Source1:       20-ntfs-config-write-policy.fdi
 %endif
-# http://tuxera.com/forum/viewtopic.php?f=2&t=31104
-Source2:	boot-gpl.c
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
@@ -42,7 +36,7 @@ Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
-Patch1:		CVE-2015-3202.patch
+Patch1:		check-mftmirr.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -88,8 +82,7 @@ included utilities see man 8 ntfsprogs after installation).
 %prep
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
-
-cp %{SOURCE2} ntfsprogs/boot.c
+%patch1 -p0 -b .check-mftmirr
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -298,6 +291,13 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Thu Jan  4 2017 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-4
+- use upstream tarball again (non-free file is removed)
+- remove unused CVE-2015-3202 patch
+
+* Wed Dec 20 2017 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-3.1
+- test build with patch from Jean-Pierre André to fix the $MFT/$MFTMirr mismatch
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
