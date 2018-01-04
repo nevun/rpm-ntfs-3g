@@ -291,7 +291,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
-* Thu Jan  4 2017 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-4
+* Thu Jan  4 2018 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-4
 - use upstream tarball again (non-free file is removed)
 - remove unused CVE-2015-3202 patch
 
