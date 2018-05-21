@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	5%{?dist}
+Release:	6%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
@@ -37,6 +37,7 @@ Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		check-mftmirr.patch
+Patch2:		ntfs-3g-big-sectors.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -83,6 +84,7 @@ included utilities see man 8 ntfsprogs after installation).
 %setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
 %patch0 -p1 -b .unsupported
 %patch1 -p0 -b .check-mftmirr
+%patch2 -p0 -b .big-sectors
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -291,6 +293,12 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Mon May 21 2018 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-6
+- apply updated big sectors patch
+
+* Mon May  7 2018 Tom Callaway <spot@fedoraproject.org>
+- big sectors patch from Jean-Pierre André
+
 * Thu Feb 08 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
