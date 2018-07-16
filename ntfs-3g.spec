@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	7%{?dist}
+Release:	8%{?dist}
 License:	GPLv2+
 Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
@@ -38,6 +38,10 @@ Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		check-mftmirr.patch
 Patch2:		ntfs-3g-big-sectors.patch
+# Fix for ntfsclone crash.
+# Discussed with upstream developer but not upstream yet, see:
+# https://bugzilla.redhat.com/show_bug.cgi?id=1601146#c4
+Patch3:         ntfsclone-full-clusters-bz1601146.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -85,6 +89,7 @@ included utilities see man 8 ntfsprogs after installation).
 %patch0 -p1 -b .unsupported
 %patch1 -p0 -b .check-mftmirr
 %patch2 -p0 -b .big-sectors
+%patch3 -p0 -b .ntfsclone
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -293,6 +298,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Mon Jul 16 2018 Richard W.M. Jones <rjones@redhat.com> - 2:2017.3.23-8
+- Fix for ntfsclone crash (RHBZ#1601146).
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-7
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
