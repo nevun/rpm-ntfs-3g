@@ -175,8 +175,7 @@ mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %endif
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
 %doc AUTHORS ChangeLog CREDITS NEWS README
