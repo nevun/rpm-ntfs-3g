@@ -18,7 +18,6 @@ Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
 Release:	8%{?dist}
 License:	GPLv2+
-Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
 Source1:       20-ntfs-config-write-policy.fdi
@@ -56,7 +55,6 @@ file access right and ownership support.
 
 %package devel
 Summary:	Development files and libraries for ntfs-3g
-Group:		Development/Libraries
 Requires:	%{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
@@ -70,7 +68,6 @@ functionality.
 
 %package -n ntfsprogs
 Summary:	NTFS filesystem libraries and utilities
-Group:		System Environment/Base
 # We don't really provide this. This code is dead and buried now.
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
