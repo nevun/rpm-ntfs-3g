@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	9%{?dist}
+Release:	10%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
@@ -26,6 +26,9 @@ URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
+%endif
+%if 0%{?fedora}
+Recommends:	ntfs-3g-system-compression
 %endif
 BuildRequires:	libtool, libattr-devel
 # ntfsprogs BuildRequires
@@ -294,6 +297,10 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Mon Mar 11 2019 Kamil Páral <kparal@redhat.com> - 2:2017.3.23-10
+- add Recommends: ntfs-3g-system-compression. That allows people with
+  Windows 10 to read system files.
+
 * Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-9
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
