@@ -16,17 +16,19 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	6%{?dist}
+Release:	11%{?dist}
 License:	GPLv2+
-Group:		System Environment/Base
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
-Source1:       20-ntfs-config-write-policy.fdi
+Source1:	20-ntfs-config-write-policy.fdi
 %endif
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
+%endif
+%if 0%{?fedora}
+Recommends:	ntfs-3g-system-compression
 %endif
 BuildRequires:	libtool, libattr-devel
 # ntfsprogs BuildRequires
@@ -38,6 +40,13 @@ Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 Patch1:		check-mftmirr.patch
 Patch2:		ntfs-3g-big-sectors.patch
+# Fix for ntfsclone crash.
+# Discussed with upstream developer but not upstream yet, see:
+# https://bugzilla.redhat.com/show_bug.cgi?id=1601146#c4
+Patch3:		ntfsclone-full-clusters-bz1601146.patch
+# Upstream fix for CVE-2019-9755
+# https://sourceforge.net/p/ntfs-3g/ntfs-3g/ci/85c1634a26faa572d3c558d4cf8aaaca5202d4e9/
+Patch4:		ntfs-3g-CVE-2019-9755.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -52,7 +61,6 @@ file access right and ownership support.
 
 %package devel
 Summary:	Development files and libraries for ntfs-3g
-Group:		Development/Libraries
 Requires:	%{name}%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
@@ -66,7 +74,6 @@ functionality.
 
 %package -n ntfsprogs
 Summary:	NTFS filesystem libraries and utilities
-Group:		System Environment/Base
 # We don't really provide this. This code is dead and buried now.
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
@@ -85,6 +92,8 @@ included utilities see man 8 ntfsprogs after installation).
 %patch0 -p1 -b .unsupported
 %patch1 -p0 -b .check-mftmirr
 %patch2 -p0 -b .big-sectors
+%patch3 -p0 -b .ntfsclone
+%patch4 -p1 -b .CVE-2019-9755
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -170,8 +179,7 @@ mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %endif
 
-%post -p /sbin/ldconfig
-%postun -p /sbin/ldconfig
+%ldconfig_scriptlets
 
 %files
 %doc AUTHORS ChangeLog CREDITS NEWS README
@@ -293,6 +301,22 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Fri Mar 29 2019 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-11
+- add upstream fix for CVE-2019-9755
+
+* Mon Mar 11 2019 Kamil Páral <kparal@redhat.com> - 2:2017.3.23-10
+- add Recommends: ntfs-3g-system-compression. That allows people with
+  Windows 10 to read system files.
+
+* Fri Feb 01 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
+* Mon Jul 16 2018 Richard W.M. Jones <rjones@redhat.com> - 2:2017.3.23-8
+- Fix for ntfsclone crash (RHBZ#1601146).
+
+* Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Mon May 21 2018 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-6
 - apply updated big sectors patch
 
