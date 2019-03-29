@@ -16,11 +16,11 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	10%{?dist}
+Release:	11%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
-Source1:       20-ntfs-config-write-policy.fdi
+Source1:	20-ntfs-config-write-policy.fdi
 %endif
 URL:		http://www.ntfs-3g.org/
 %if %{with_externalfuse}
@@ -43,7 +43,10 @@ Patch2:		ntfs-3g-big-sectors.patch
 # Fix for ntfsclone crash.
 # Discussed with upstream developer but not upstream yet, see:
 # https://bugzilla.redhat.com/show_bug.cgi?id=1601146#c4
-Patch3:         ntfsclone-full-clusters-bz1601146.patch
+Patch3:		ntfsclone-full-clusters-bz1601146.patch
+# Upstream fix for CVE-2019-9755
+# https://sourceforge.net/p/ntfs-3g/ntfs-3g/ci/85c1634a26faa572d3c558d4cf8aaaca5202d4e9/
+Patch4:		ntfs-3g-CVE-2019-9755.patch
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
@@ -90,6 +93,7 @@ included utilities see man 8 ntfsprogs after installation).
 %patch1 -p0 -b .check-mftmirr
 %patch2 -p0 -b .big-sectors
 %patch3 -p0 -b .ntfsclone
+%patch4 -p1 -b .CVE-2019-9755
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -297,6 +301,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Fri Mar 29 2019 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-11
+- add upstream fix for CVE-2019-9755
+
 * Mon Mar 11 2019 Kamil Páral <kparal@redhat.com> - 2:2017.3.23-10
 - add Recommends: ntfs-3g-system-compression. That allows people with
   Windows 10 to read system files.
