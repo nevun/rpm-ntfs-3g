@@ -117,7 +117,7 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
 
 %install
-make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
+make LIBTOOL=`which libtool` DESTDIR=%{buildroot} install
 %if %{oldrhel}
 rm -rf %{buildroot}/%{_lib}/*.la
 rm -rf %{buildroot}/%{_lib}/*.a
