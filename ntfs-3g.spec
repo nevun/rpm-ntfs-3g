@@ -23,6 +23,7 @@ Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.
 Source1:	20-ntfs-config-write-policy.fdi
 %endif
 URL:		http://www.ntfs-3g.org/
+BuildRequires: make
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
