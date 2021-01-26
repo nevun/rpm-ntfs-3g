@@ -16,7 +16,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2017.3.23
-Release:	14%{?dist}
+Release:	15%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
 %if %{oldrhel}
@@ -302,6 +302,9 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
