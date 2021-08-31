@@ -130,7 +130,7 @@ rmdir %{buildroot}/sbin
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
-%ldconfig_scriptlets -n libs
+%ldconfig_scriptlets libs
 
 %files
 %doc AUTHORS ChangeLog CREDITS NEWS README
