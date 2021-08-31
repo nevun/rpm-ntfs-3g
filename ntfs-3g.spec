@@ -27,6 +27,9 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+# For library split out
+Obsoletes:	%{name} < 2:2021.8.22-1
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 
 %description
@@ -40,9 +43,17 @@ streams and sparse files; it can handle special files like symbolic links,
 devices, and FIFOs, ACL, extended attributes; moreover it provides full
 file access right and ownership support.
 
+%package libs
+Summary:	Runtime libraries for ntfs-3g
+# For library split out
+Obsoletes:	%{name} < 2:2021.8.22-1
+
+%description libs
+Libraries for applications to use ntfs-3g functionality.
+
 %package devel
 Summary:	Development files and libraries for ntfs-3g
-Requires:	%{name}%{?_isa} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
 # ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that
@@ -55,6 +66,7 @@ functionality.
 
 %package -n ntfsprogs
 Summary:	NTFS filesystem libraries and utilities
+Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # We don't really provide this. This code is dead and buried now.
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
@@ -118,7 +130,7 @@ rmdir %{buildroot}/sbin
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
-%ldconfig_scriptlets
+%ldconfig_scriptlets -n libs
 
 %files
 %doc AUTHORS ChangeLog CREDITS NEWS README
@@ -131,10 +143,13 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %{_bindir}/ntfsmount
 %{_bindir}/ntfs-3g.probe
 %{_bindir}/lowntfs-3g
-%{_libdir}/libntfs-3g.so.*
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
+
+%files libs
+%license COPYING
+%{_libdir}/libntfs-3g.so.*
 
 %files devel
 %{_includedir}/ntfs-3g/
@@ -179,6 +194,7 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 * Tue Aug 31 2021 Neal Gompa <ngompa@datto.com> - 2:2021.8.22-1
 - Rebase to version 2021.8.22 to fix various CVEs (RHBZ#1999869)
 - Clean up old cruft for RHEL < 7
+- Split libraries out to libs subpackage
 
 * Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
