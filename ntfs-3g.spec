@@ -5,24 +5,14 @@
 # For release candidates
 # %%global subver -RC
 
-%global oldrhel 0
-
-%if 0%{?rhel}
-%if 0%{?rhel} < 7
-%global oldrhel 1
-%endif
-%endif
-
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2017.3.23
-Release:	11%{?dist}
+Version:	2021.8.22
+Release:	1%{?dist}
 License:	GPLv2+
-Source0:	http://tuxera.com/opensource/%%{name}_ntfsprogs-%%{version}%%{?subver}.tgz
-%if %{oldrhel}
-Source1:	20-ntfs-config-write-policy.fdi
-%endif
-URL:		http://www.ntfs-3g.org/
+Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+URL:		https://www.tuxera.com/company/open-source/
+BuildRequires: make
 %if %{with_externalfuse}
 BuildRequires:	fuse-devel
 Requires:	fuse
@@ -37,34 +27,36 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+# For library split out
+Obsoletes:	%{name} < 2:2021.8.22-1
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
-Patch1:		check-mftmirr.patch
-Patch2:		ntfs-3g-big-sectors.patch
-# Fix for ntfsclone crash.
-# Discussed with upstream developer but not upstream yet, see:
-# https://bugzilla.redhat.com/show_bug.cgi?id=1601146#c4
-Patch3:		ntfsclone-full-clusters-bz1601146.patch
-# Upstream fix for CVE-2019-9755
-# https://sourceforge.net/p/ntfs-3g/ntfs-3g/ci/85c1634a26faa572d3c558d4cf8aaaca5202d4e9/
-Patch4:		ntfs-3g-CVE-2019-9755.patch
 
 %description
-NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS 
-driver for Linux and many other operating systems. It provides safe 
-handling of the Windows XP, Windows Server 2003, Windows 2000, Windows 
-Vista, Windows Server 2008 and Windows 7 NTFS file systems. NTFS-3G can 
-create, remove, rename, move files, directories, hard links, and streams; 
-it can read and write normal and transparently compressed files, including 
-streams and sparse files; it can handle special files like symbolic links, 
-devices, and FIFOs, ACL, extended attributes; moreover it provides full 
+NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS
+driver for Linux and many other operating systems. It provides safe
+handling of the Windows XP, Windows Server 2003, Windows 2000, Windows
+Vista, Windows Server 2008 and Windows 7 NTFS file systems. NTFS-3G can
+create, remove, rename, move files, directories, hard links, and streams;
+it can read and write normal and transparently compressed files, including
+streams and sparse files; it can handle special files like symbolic links,
+devices, and FIFOs, ACL, extended attributes; moreover it provides full
 file access right and ownership support.
+
+%package libs
+Summary:	Runtime libraries for ntfs-3g
+# For library split out
+Obsoletes:	%{name} < 2:2021.8.22-1
+
+%description libs
+Libraries for applications to use ntfs-3g functionality.
 
 %package devel
 Summary:	Development files and libraries for ntfs-3g
-Requires:	%{name}%{?_isa} = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 Requires:	pkgconfig
 Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
-# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that
 # standalone package.
 Obsoletes:	ntfsprogs-devel < 2.0.0-17
 
@@ -74,26 +66,23 @@ functionality.
 
 %package -n ntfsprogs
 Summary:	NTFS filesystem libraries and utilities
+Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # We don't really provide this. This code is dead and buried now.
 Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-gnomevfs
 # Needed to fix multilib issue
-# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that 
+# ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that
 # standalone package.
 Obsoletes:	ntfsprogs < 2.0.0-17
 
 %description -n ntfsprogs
-The ntfsprogs package currently consists of a library and utilities such as 
-mkntfs, ntfscat, ntfsls, ntfsresize, and ntfsundelete (for a full list of 
+The ntfsprogs package currently consists of a library and utilities such as
+mkntfs, ntfscat, ntfsls, ntfsresize, and ntfsundelete (for a full list of
 included utilities see man 8 ntfsprogs after installation).
 
 %prep
-%setup -q -n %{name}_ntfsprogs-%{version}%{?subver}
-%patch0 -p1 -b .unsupported
-%patch1 -p0 -b .check-mftmirr
-%patch2 -p0 -b .big-sectors
-%patch3 -p0 -b .ntfsclone
-%patch4 -p1 -b .CVE-2019-9755
+%autosetup -n %{name}_ntfsprogs-%{version}%{?subver} -p1
+
 
 %build
 CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
@@ -104,49 +93,29 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 	--with-fuse=external \
 %endif
 	--exec-prefix=/ \
-%if %{oldrhel}
-	--bindir=/bin \
-	--sbindir=/sbin \
-	--libdir=/%{_lib} \
-%endif
 	--enable-posix-acls \
 	--enable-xattr-mappings \
 	--enable-crypto \
 	--enable-extras \
 	--enable-quarantined
-make %{?_smp_mflags} LIBTOOL=%{_bindir}/libtool
+%make_build LIBTOOL=%{_bindir}/libtool
+
 
 %install
-make LIBTOOL=%{_bindir}/libtool DESTDIR=%{buildroot} install
-%if %{oldrhel}
-rm -rf %{buildroot}/%{_lib}/*.la
-rm -rf %{buildroot}/%{_lib}/*.a
-%else
+%make_install LIBTOOL=%{_bindir}/libtool
+
 rm -rf %{buildroot}%{_libdir}/*.la
 rm -rf %{buildroot}%{_libdir}/*.a
-%endif
 
-%if %{oldrhel}
-rm -rf %{buildroot}/sbin/mount.ntfs-3g
-cp -a %{buildroot}/bin/ntfs-3g %{buildroot}/sbin/mount.ntfs-3g
-%else
 rm -rf %{buildroot}/%{_sbindir}/mount.ntfs-3g
 cp -a %{buildroot}/%{_bindir}/ntfs-3g %{buildroot}/%{_sbindir}/mount.ntfs-3g
-%endif
 
 # Actually make some symlinks for simplicity...
 # ... since we're obsoleting ntfsprogs-fuse
-%if %{oldrhel}
-pushd %{buildroot}/bin
-ln -s ntfs-3g ntfsmount
-popd
-pushd %{buildroot}/sbin
-%else
 pushd %{buildroot}/%{_bindir}
 ln -s ntfs-3g ntfsmount
 popd
 pushd %{buildroot}/%{_sbindir}
-%endif
 ln -s mount.ntfs-3g mount.ntfs-fuse
 # And since there is no other package in Fedora that provides an ntfs 
 # mount...
@@ -155,98 +124,40 @@ ln -s mount.ntfs-3g mount.ntfs
 ln -s ../bin/ntfsck fsck.ntfs
 popd
 
-%if %{oldrhel}
-# Compat symlinks
-mkdir -p %{buildroot}%{_bindir}
-pushd %{buildroot}%{_bindir}
-ln -s /bin/ntfs-3g ntfs-3g
-ln -s /bin/ntfsmount ntfsmount
-popd
-
-# Put the .pc file in the right place.
-mkdir -p %{buildroot}%{_libdir}/pkgconfig/
-mv %{buildroot}/%{_lib}/pkgconfig/libntfs-3g.pc %{buildroot}%{_libdir}/pkgconfig/
-%else
 mv %{buildroot}/sbin/* %{buildroot}/%{_sbindir}
 rmdir %{buildroot}/sbin
-%endif
 
 # We get this on our own, thanks.
 rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 
-%if %{oldrhel}
-mkdir -p %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
-%endif
-
-%ldconfig_scriptlets
+%ldconfig_scriptlets -n libs
 
 %files
 %doc AUTHORS ChangeLog CREDITS NEWS README
-%if %{oldrhel}
-%doc COPYING
-%else
 %license COPYING
-%endif
-%if %{oldrhel}
-/sbin/mount.ntfs
-/sbin/mount.ntfs-3g
-/sbin/mount.ntfs-fuse
-/sbin/mount.lowntfs-3g
-/bin/ntfs-3g
-/bin/ntfsmount
-#compat symlinks
-%{_bindir}/ntfs-3g
-%{_bindir}/ntfsmount
-%else
 %{_sbindir}/mount.ntfs
 %{_sbindir}/mount.ntfs-3g
 %{_sbindir}/mount.ntfs-fuse
 %{_sbindir}/mount.lowntfs-3g
 %{_bindir}/ntfs-3g
 %{_bindir}/ntfsmount
-%endif
-%if %{oldrhel}
-/bin/ntfs-3g.probe
-/bin/lowntfs-3g
-%else
 %{_bindir}/ntfs-3g.probe
 %{_bindir}/lowntfs-3g
-%endif
-%if %{oldrhel}
-/%{_lib}/libntfs-3g.so.*
-%else
-%{_libdir}/libntfs-3g.so.*
-%endif
 %{_mandir}/man8/mount.lowntfs-3g.*
 %{_mandir}/man8/mount.ntfs-3g.*
 %{_mandir}/man8/ntfs-3g*
-%if %{oldrhel}
-%{_datadir}/hal/fdi/policy/10osvendor/20-ntfs-config-write-policy.fdi
-%endif
+
+%files libs
+%license COPYING
+%{_libdir}/libntfs-3g.so.*
 
 %files devel
 %{_includedir}/ntfs-3g/
-%if %{oldrhel}
-/%{_lib}/libntfs-3g.so
-%else
 %{_libdir}/libntfs-3g.so
-%endif
 %{_libdir}/pkgconfig/libntfs-3g.pc
 
 %files -n ntfsprogs
 %doc AUTHORS CREDITS ChangeLog NEWS README
-%if %{oldrhel}
-%doc COPYING
-/bin/ntfscat
-/bin/ntfscluster
-/bin/ntfscmp
-/bin/ntfsfix
-/bin/ntfsinfo
-/bin/ntfsls
-/bin/ntfssecaudit
-/bin/ntfsusermap
-%else
 %license COPYING
 %{_bindir}/ntfscat
 %{_bindir}/ntfscluster
@@ -256,27 +167,7 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_bindir}/ntfsls
 %{_bindir}/ntfssecaudit
 %{_bindir}/ntfsusermap
-%endif
 # Extras
-%if %{oldrhel}
-/bin/ntfsck
-/bin/ntfsdecrypt
-/bin/ntfsdump_logfile
-/bin/ntfsfallocate
-/bin/ntfsmftalloc
-/bin/ntfsmove
-/bin/ntfsrecover
-/bin/ntfstruncate
-/bin/ntfswipe
-/sbin/fsck.ntfs
-/sbin/mkfs.ntfs
-/sbin/mkntfs
-/sbin/ntfsclone
-/sbin/ntfscp
-/sbin/ntfslabel
-/sbin/ntfsresize
-/sbin/ntfsundelete
-%else
 %{_bindir}/ntfsck
 %{_bindir}/ntfsdecrypt
 %{_bindir}/ntfsdump_logfile
@@ -294,13 +185,35 @@ cp -a %{SOURCE1} %{buildroot}%{_datadir}/hal/fdi/policy/10osvendor/
 %{_sbindir}/ntfslabel
 %{_sbindir}/ntfsresize
 %{_sbindir}/ntfsundelete
-%endif
 %{_mandir}/man8/mkntfs.8*
 %{_mandir}/man8/mkfs.ntfs.8*
 %{_mandir}/man8/ntfs[^m][^o]*.8*
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Tue Aug 31 2021 Neal Gompa <ngompa@datto.com> - 2:2021.8.22-1
+- Rebase to version 2021.8.22 to fix various CVEs (RHBZ#1999869)
+- Clean up old cruft for RHEL < 7
+- Split libraries out to libs subpackage
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed Feb 24 2021 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-16
+- correct URL
+
+* Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-15
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
+* Tue Jul 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
+* Wed Jan 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
+* Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 2:2017.3.23-12
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
+
 * Fri Mar 29 2019 Tom Callaway <spot@fedoraproject.org> - 2:2017.3.23-11
 - add upstream fix for CVE-2019-9755
 
