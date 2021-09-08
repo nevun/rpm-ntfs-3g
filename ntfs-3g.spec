@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2021.8.22
-Release:	1%{?dist}
+Release:	2%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
 URL:		https://www.tuxera.com/company/open-source/
@@ -27,9 +27,8 @@ Epoch:		2
 Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
 Obsoletes:	ntfsprogs-fuse
 Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
-Requires:	%{name}-libs = %{epoch}:%{version}-%{release}
+Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # For library split out
-Obsoletes:	%{name} < 2:2021.8.22-1
 Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
 
 %description
@@ -45,8 +44,6 @@ file access right and ownership support.
 
 %package libs
 Summary:	Runtime libraries for ntfs-3g
-# For library split out
-Obsoletes:	%{name} < 2:2021.8.22-1
 
 %description libs
 Libraries for applications to use ntfs-3g functionality.
@@ -191,6 +188,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Sep  8 2021 Tom Callaway <spot@fedoraproject.org> - 2:2021.8.22-2
+- remove incorrect obsoletes
+
 * Tue Aug 31 2021 Neal Gompa <ngompa@datto.com> - 2:2021.8.22-1
 - Rebase to version 2021.8.22 to fix various CVEs (RHBZ#1999869)
 - Clean up old cruft for RHEL < 7
