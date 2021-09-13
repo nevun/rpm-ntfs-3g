@@ -8,7 +8,7 @@
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
 Version:	2021.8.22
-Release:	2%{?dist}
+Release:	3%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
 URL:		https://www.tuxera.com/company/open-source/
@@ -188,6 +188,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Mon Sep 13 2021 Richard W.M. Jones <rjones@redhat.com> - 2:2021.8.22-3
+- Remove unused ntfsprogs/boot.c replacement
+
 * Wed Sep  8 2021 Tom Callaway <spot@fedoraproject.org> - 2:2021.8.22-2
 - remove incorrect obsoletes
 
