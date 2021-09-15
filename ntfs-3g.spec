@@ -1,35 +1,39 @@
 # Pass --with externalfuse to compile against system fuse lib
 # Default is internal fuse-lite.
-%global with_externalfuse %{?_with_externalfuse:1}%{!?_with_externalfuse:0}
+%bcond_with externalfuse
 
 # For release candidates
 # %%global subver -RC
 
-Name:		ntfs-3g
-Summary:	Linux NTFS userspace driver
-Version:	2021.8.22
-Release:	3%{?dist}
-License:	GPLv2+
-Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
-URL:		https://www.tuxera.com/company/open-source/
-BuildRequires: make
-%if %{with_externalfuse}
-BuildRequires:	fuse-devel
-Requires:	fuse
+Name:           ntfs-3g
+Epoch:          2
+Version:        2021.8.22
+Release:        4%{?dist}
+Summary:        Linux NTFS userspace driver
+License:        GPLv2+
+URL:            https://www.tuxera.com/company/open-source/
+Source0:        http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
+Patch0:         ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+BuildRequires:  make
+# ntfs-3g BuildRequires
+BuildRequires:  gnutls-devel
+BuildRequires:  libattr-devel
+%if %{with externalfuse}
+BuildRequires:  fuse-devel
+Requires:       fuse
 %endif
-%if 0%{?fedora}
-Recommends:	ntfs-3g-system-compression
-%endif
-BuildRequires:	libtool, libattr-devel
 # ntfsprogs BuildRequires
-BuildRequires:  libconfig-devel, libgcrypt-devel, gnutls-devel, libuuid-devel
-Epoch:		2
-Provides:	ntfsprogs-fuse = %{epoch}:%{version}-%{release}
-Obsoletes:	ntfsprogs-fuse
-Provides:	fuse-ntfs-3g = %{epoch}:%{version}-%{release}
-Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
-# For library split out
-Patch0:		ntfs-3g_ntfsprogs-2011.10.9-RC-ntfsck-unsupported-return-0.patch
+BuildRequires:  libconfig-devel
+BuildRequires:  libgcrypt-devel
+BuildRequires:  libtool
+BuildRequires:  libuuid-devel
+Requires:       %{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
+Provides:       ntfsprogs-fuse = %{epoch}:%{version}-%{release}
+Obsoletes:      ntfsprogs-fuse < %{epoch}:%{version}-%{release}
+Provides:       fuse-ntfs-3g = %{epoch}:%{version}-%{release}
+%if 0%{?fedora}
+Recommends:     ntfs-3g-system-compression
+%endif
 
 %description
 NTFS-3G is a stable, open source, GPL licensed, POSIX, read/write NTFS
@@ -43,34 +47,33 @@ devices, and FIFOs, ACL, extended attributes; moreover it provides full
 file access right and ownership support.
 
 %package libs
-Summary:	Runtime libraries for ntfs-3g
+Summary:        Runtime libraries for ntfs-3g
 
 %description libs
 Libraries for applications to use ntfs-3g functionality.
 
 %package devel
-Summary:	Development files and libraries for ntfs-3g
-Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
-Requires:	pkgconfig
-Provides:	ntfsprogs-devel = %{epoch}:%{version}-%{release}
+Summary:        Development files and libraries for ntfs-3g
+Requires:       %{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
+Provides:       ntfsprogs-devel = %{epoch}:%{version}-%{release}
 # ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that
 # standalone package.
-Obsoletes:	ntfsprogs-devel < 2.0.0-17
+Obsoletes:      ntfsprogs-devel < 2.0.0-17
 
 %description devel
 Headers and libraries for developing applications that use ntfs-3g
 functionality.
 
 %package -n ntfsprogs
-Summary:	NTFS filesystem libraries and utilities
-Requires:	%{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
+Summary:        NTFS filesystem libraries and utilities
+Requires:       %{name}-libs%{?_isa} = %{epoch}:%{version}-%{release}
 # We don't really provide this. This code is dead and buried now.
-Provides:	ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
-Obsoletes:	ntfsprogs-gnomevfs
+Provides:       ntfsprogs-gnomevfs = %{epoch}:%{version}-%{release}
+Obsoletes:      ntfsprogs-gnomevfs < %{epoch}:%{version}-%{release}
 # Needed to fix multilib issue
 # ntfsprogs-2.0.0-17 was never built. 2.0.0-16 was the last build for that
 # standalone package.
-Obsoletes:	ntfsprogs < 2.0.0-17
+Obsoletes:      ntfsprogs < 2.0.0-17
 
 %description -n ntfsprogs
 The ntfsprogs package currently consists of a library and utilities such as
@@ -82,11 +85,11 @@ included utilities see man 8 ntfsprogs after installation).
 
 
 %build
-CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
+CFLAGS="%{optflags} -D_FILE_OFFSET_BITS=64"
 %configure \
 	--disable-static \
 	--disable-ldconfig \
-%if 0%{?_with_externalfuse:1}
+%if %{with externalfuse}
 	--with-fuse=external \
 %endif
 	--exec-prefix=/ \
@@ -101,7 +104,7 @@ CFLAGS="$RPM_OPT_FLAGS -D_FILE_OFFSET_BITS=64"
 %install
 %make_install LIBTOOL=%{_bindir}/libtool
 
-rm -rf %{buildroot}%{_libdir}/*.la
+find %{buildroot} -type f -name "*.la" -delete -print
 rm -rf %{buildroot}%{_libdir}/*.a
 
 rm -rf %{buildroot}/%{_sbindir}/mount.ntfs-3g
@@ -114,7 +117,7 @@ ln -s ntfs-3g ntfsmount
 popd
 pushd %{buildroot}/%{_sbindir}
 ln -s mount.ntfs-3g mount.ntfs-fuse
-# And since there is no other package in Fedora that provides an ntfs 
+# And since there is no other package in Fedora that provides an ntfs
 # mount...
 ln -s mount.ntfs-3g mount.ntfs
 # Need this for fsck to find it
@@ -188,6 +191,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Sep 15 2021 Neal Gompa <ngompa@datto.com> - 2:2021.8.22-4
+- Restyle the spec for legibility
+
 * Mon Sep 13 2021 Richard W.M. Jones <rjones@redhat.com> - 2:2021.8.22-3
 - Remove unused ntfsprogs/boot.c replacement
 
