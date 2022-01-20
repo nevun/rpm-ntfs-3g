@@ -8,7 +8,7 @@
 Name:           ntfs-3g
 Epoch:          2
 Version:        2021.8.22
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        Linux NTFS userspace driver
 License:        GPLv2+
 URL:            https://www.tuxera.com/company/open-source/
@@ -191,6 +191,9 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 2:2021.8.22-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
 * Wed Sep 15 2021 Neal Gompa <ngompa@datto.com> - 2:2021.8.22-4
 - Restyle the spec for legibility
 
