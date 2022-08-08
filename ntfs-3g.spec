@@ -7,8 +7,8 @@
 
 Name:		ntfs-3g
 Summary:	Linux NTFS userspace driver
-Version:	2021.8.22
-Release:	2%{?dist}
+Version:	2022.5.17
+Release:	1%{?dist}
 License:	GPLv2+
 Source0:	http://tuxera.com/opensource/%{name}_ntfsprogs-%{version}%{?subver}.tgz
 URL:		https://www.tuxera.com/company/open-source/
@@ -188,6 +188,11 @@ rm -rf %{buildroot}%{_defaultdocdir}/%{name}/README
 %exclude %{_mandir}/man8/ntfs-3g*
 
 %changelog
+* Wed Jun 08 2022 Richard W.M. Jones <rjones@redhat.com> - 2:2022.5.17-1
+ - New upstream version 2022.5.17
+ - Fixes: CVE-2021-46790, CVE-2022-30783, CVE-2022-30784, CVE-2022-30785,
+   CVE-2022-30786, CVE-2022-30787, CVE-2022-30788, CVE-2022-30789 
+
 * Wed Sep  8 2021 Tom Callaway <spot@fedoraproject.org> - 2:2021.8.22-2
 - remove incorrect obsoletes
 
